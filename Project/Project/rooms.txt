@@ -1,0 +1,2 @@
+Rooms:0
+//capacity,penalty
