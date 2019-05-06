@@ -12,9 +12,9 @@ public:
 	Time();
 	Time(std::string time);
 	Time(int hour, int minutes, int seconds);
-	int getHour();
-	int getMinutes();
-	int getSeconds();
+	int getHours() const;
+	int getMinutes() const;
+	int getSeconds() const;
 
 };
 
@@ -28,10 +28,9 @@ public:
 	Date();
 	Date(std::string date);
 	Date(int day, int month, int year);
-	int getDay();
-	int getMonth();
-	int getYear();
-
+	int getDay() const;
+	int getMonth() const;
+	int getYear() const;
 };
 
 class Exam {
@@ -41,8 +40,8 @@ class Exam {
 
 public:
 	Exam(int duration, int sCnt);
-	int getDuration();
-	int getStudentsCnt();
+	int getDuration() const;
+	int getStudentsCnt() const;
 
 };
 
@@ -55,10 +54,10 @@ class Period {
 
 public:
 	Period(Date date, Time time, int duration, int penalty);
-	Date getDate();
-	Time getTime();
-	int getDuration();
-	int getPenalty();
+	Date getDate() const;
+	Time getTime() const;
+	int getDuration() const;
+	int getPenalty() const;
 
 };
 
@@ -69,10 +68,33 @@ class Room {
 
 public:
 	Room(int capacity, int penalty);
-	int getCapacity();
-	int getPenalty();
+	int getCapacity() const;
+	int getPenalty() const;
 
 };
 
+bool operator< (const Date& lhs, const Date& rhs);
+bool operator> (const Date& lhs, const Date& rhs);
+bool operator<=(const Date& lhs, const Date& rhs);
+bool operator>=(const Date& lhs, const Date& rhs);
+bool operator==(const Date& lhs, const Date& rhs);
+
+bool operator< (const Time& lhs, const Time& rhs);
+bool operator> (const Time& lhs, const Time& rhs);
+bool operator<=(const Time& lhs, const Time& rhs);
+bool operator>=(const Time& lhs, const Time& rhs);
+bool operator==(const Time& lhs, const Time& rhs);
+
+bool operator< (const Period& lhs, const Period& rhs);
+bool operator> (const Period& lhs, const Period& rhs);
+bool operator<=(const Period& lhs, const Period& rhs);
+bool operator>=(const Period& lhs, const Period& rhs);
+bool operator==(const Period& lhs, const Period& rhs);
+
+bool operator< (const Room& lhs, const Room& rhs);
+bool operator> (const Room& lhs, const Room& rhs);
+bool operator<=(const Room& lhs, const Room& rhs);
+bool operator>=(const Room& lhs, const Room& rhs);
+bool operator==(const Room& lhs, const Room& rhs);
 
 

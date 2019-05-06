@@ -11,6 +11,9 @@ Data::Data()
 	this->periodsCnt = 0;
 	this->roomsCnt = 0;
 	this->read();
+
+	std::sort(this->periods.begin(), this->periods.end());
+	std::sort(this->rooms.begin(), this->rooms.end());
 }
 
 void Data::read()
@@ -151,7 +154,7 @@ Node Data::generateInitialState()
 	Node node;
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < this->examsCnt; i++)
 	{
 		std::pair<int, int> pair;
 		bool available = false;
@@ -164,4 +167,31 @@ Node Data::generateInitialState()
 		node.addAnswer(pair);
 	}
 	return node;
+}
+
+int Data::getStateValue(Node solution)
+{
+	int value = 0;
+	for (size_t i = 0; i < solution.getAnswersSize(); i++)
+	{
+		std::pair<int, int> answer = solution.getAnswer(i);
+		value += this->periods.at(answer.first).getPenalty();
+		value += this->rooms.at(answer.second).getPenalty();
+	}
+	return value;
+}
+
+std::vector<Exam> Data::getExams()
+{
+	return this->exams;
+}
+
+std::vector<Period> Data::getPeriods()
+{
+	return this->periods;
+}
+
+std::vector<Room> Data::getRooms()
+{
+	return this->rooms;
 }

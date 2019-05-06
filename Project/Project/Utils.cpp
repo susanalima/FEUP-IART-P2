@@ -9,12 +9,12 @@ Exam::Exam(int duration, int sCnt)
 	this->studentsCnt = sCnt;
 }
 
-int Exam::getDuration()
+int Exam::getDuration() const
 {
 	return this->duration;
 }
 
-int Exam::getStudentsCnt()
+int Exam::getStudentsCnt() const
 {
 	return this->studentsCnt;
 }
@@ -27,22 +27,22 @@ Period::Period(Date date, Time time, int duration, int penalty)
 	this->penalty = penalty;
 }
 
-Date Period::getDate()
+Date Period::getDate() const
 {
 	return this->date;
 }
 
-Time Period::getTime()
+Time Period::getTime() const
 {
 	return this->time;
 }
 
-int Period::getDuration()
+int Period::getDuration() const
 {
 	return this->duration;
 }
 
-int Period::getPenalty()
+int Period::getPenalty() const
 {
 	return this->duration;
 }
@@ -53,12 +53,12 @@ Room::Room(int capacity, int penalty)
 	this->penalty = penalty;
 }
 
-int Room::getCapacity()
+int Room::getCapacity() const
 {
 	return this->capacity;
 }
 
-int Room::getPenalty()
+int Room::getPenalty() const
 {
 	return this->penalty;
 }
@@ -75,6 +75,9 @@ Time::Time()
 
 Time::Time(std::string time)
 {
+	this->hours = 0;
+	this->minutes = 0;
+	this->seconds = 0;
 	std::stringstream input(time);
 	std::string cell;
 
@@ -98,17 +101,17 @@ Time::Time(int hour, int minutes, int seconds)
 	this->seconds = seconds;
 }
 
-int Time::getHour()
+int Time::getHours() const
 {
 	return this->hours;
 }
 
-int Time::getMinutes()
+int Time::getMinutes() const
 {
 	return this->minutes;
 }
 
-int Time::getSeconds()
+int Time::getSeconds() const
 {
 	return this->seconds;
 }
@@ -125,6 +128,9 @@ Date::Date()
 
 Date::Date(std::string date)
 {
+	this->day = 0;
+	this->month = 0;
+	this->year = 0;
 	std::stringstream input(date);
 	std::string cell;
 
@@ -148,17 +154,157 @@ Date::Date(int day, int month, int year)
 	this->year = year;
 }
 
-int Date::getDay()
+int Date::getDay() const
 {
 	return this->day;
 }
 
-int Date::getMonth()
+int Date::getMonth() const
 {
 	return this->month;
 }
 
-int Date::getYear()
+int Date::getYear() const
 {
 	return this->year;
+}
+
+bool operator<(const Date& lhs, const Date& rhs)
+{
+	if (lhs.getYear() < rhs.getYear())
+		return true;
+	else if (lhs.getYear() == rhs.getYear()) {
+		if (lhs.getMonth() < rhs.getMonth())
+			return true;
+		else if (lhs.getMonth() == rhs.getMonth()) {
+			if (lhs.getDay() < rhs.getDay())
+				return true;
+		}
+	}
+	return false;
+}
+
+bool operator>(const Date& lhs, const Date& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs > rhs);
+}
+
+bool operator>=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs < rhs);
+}
+
+bool operator==(const Date& lhs, const Date& rhs)
+{
+	return lhs.getYear() == rhs.getYear() && lhs.getMonth() == rhs.getMonth() && lhs.getDay() == rhs.getDay();
+}
+
+bool operator<(const Time& lhs, const Time& rhs)
+{
+	if (lhs.getHours() < rhs.getHours())
+		return true;
+	else if (lhs.getHours() == rhs.getHours()) {
+		if (lhs.getMinutes() < rhs.getMinutes())
+			return true;
+		else if (lhs.getMinutes() == rhs.getMinutes()) {
+			if (lhs.getSeconds() < rhs.getSeconds())
+				return true;
+		}
+	}
+	return false;
+}
+
+bool operator>(const Time& lhs, const Time& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Time& lhs, const Time& rhs)
+{
+	return !(lhs > rhs);
+}
+
+bool operator>=(const Time& lhs, const Time& rhs)
+{
+	return !(lhs < rhs);
+}
+
+bool operator==(const Time& lhs, const Time& rhs)
+{
+	return lhs.getHours() == rhs.getHours() && lhs.getMinutes() == rhs.getMinutes() && lhs.getSeconds() == rhs.getSeconds();
+}
+
+bool operator<(const Period& lhs, const Period& rhs)
+{
+	if (lhs.getPenalty() < rhs.getPenalty())
+		return true;
+	else if (lhs.getPenalty() == rhs.getPenalty()) {
+		if (lhs.getDate() < rhs.getDate())
+			return true;
+		else if (lhs.getDate() == rhs.getDate()) {
+			if (lhs.getTime() < rhs.getTime())
+				return true;
+			else if (lhs.getTime() == rhs.getTime()) {
+				if (lhs.getDuration() < rhs.getDuration())
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool operator>(const Period& lhs, const Period& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Period& lhs, const Period& rhs)
+{
+	return !(lhs > rhs);
+}
+
+bool operator>=(const Period& lhs, const Period& rhs)
+{
+	return !(lhs < rhs);
+}
+
+bool operator==(const Period& lhs, const Period& rhs)
+{
+	return lhs.getDate() == rhs.getDate() && lhs.getDuration() == rhs.getDuration() && lhs.getPenalty() == rhs.getPenalty() && lhs.getTime() == rhs.getTime();
+}
+
+bool operator<(const Room& lhs, const Room& rhs)
+{
+	if (lhs.getPenalty() < rhs.getPenalty())
+		return true;
+	else if (lhs.getPenalty() == rhs.getPenalty()) {
+		if (lhs.getCapacity() < rhs.getCapacity())
+			return true;
+	}
+	return false;
+}
+
+bool operator>(const Room& lhs, const Room& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Room& lhs, const Room& rhs)
+{
+	return !(lhs > rhs);
+}
+
+bool operator>=(const Room& lhs, const Room& rhs)
+{
+	return !(lhs < rhs);
+}
+
+bool operator==(const Room& lhs, const Room& rhs)
+{
+	return lhs.getCapacity() == rhs.getCapacity() && lhs.getPenalty() == rhs.getPenalty();
 }
