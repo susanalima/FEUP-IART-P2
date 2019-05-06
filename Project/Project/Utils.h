@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 class Time {
 
 	int hours;
@@ -8,6 +10,7 @@ class Time {
 
 public:
 	Time();
+	Time(std::string time);
 	Time(int hour, int minutes, int seconds);
 	int getHour();
 	int getMinutes();
@@ -23,6 +26,7 @@ class Date {
 
 public:
 	Date();
+	Date(std::string date);
 	Date(int day, int month, int year);
 	int getDay();
 	int getMonth();

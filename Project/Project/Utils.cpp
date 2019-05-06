@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 #include <ctime>
+#include <sstream>
 
 Exam::Exam(int duration, int sCnt)
 {
@@ -72,6 +73,24 @@ Time::Time()
 	this->seconds = ltm.tm_sec;
 }
 
+Time::Time(std::string time)
+{
+	std::stringstream input(time);
+	std::string cell;
+
+	int cnt = 0;
+	while (getline(input, cell, ':'))
+	{
+		if (cnt == 0)
+			this->hours = std::stoi(cell);
+		else if (cnt == 1)
+			this->minutes = std::stoi(cell);
+		else if (cnt == 2)
+			this->seconds = std::stoi(cell);
+		cnt++;
+	}
+}
+
 Time::Time(int hour, int minutes, int seconds)
 {
 	this->hours = hour;
@@ -102,6 +121,24 @@ Date::Date()
 	this->day = ltm.tm_mday;
 	this->month = ltm.tm_mon;
 	this->year = ltm.tm_year;
+}
+
+Date::Date(std::string date)
+{
+	std::stringstream input(date);
+	std::string cell;
+
+	int cnt = 0;
+	while (getline(input, cell, ':'))
+	{
+		if (cnt == 0)
+			this->day = std::stoi(cell);
+		else if (cnt == 1)
+			this->month = std::stoi(cell);
+		else if (cnt == 2)
+			this->year = std::stoi(cell);
+		cnt++;
+	}
 }
 
 Date::Date(int day, int month, int year)

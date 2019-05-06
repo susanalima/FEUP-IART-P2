@@ -1,2 +1,2 @@
-Periods:0
-//Dates, Times, Durations, Penalty
+Periods:1
+31:05:2005, 09:00:00, 180, 0

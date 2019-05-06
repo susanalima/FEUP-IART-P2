@@ -1,2 +1,2 @@
-Rooms:0
-//capacity,penalty
+Rooms:1
+500, 7
