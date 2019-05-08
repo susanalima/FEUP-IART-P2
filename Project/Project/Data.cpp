@@ -195,3 +195,18 @@ std::vector<Room> Data::getRooms()
 {
 	return this->rooms;
 }
+
+int Data::getExamsCnt()
+{
+	return this->examsCnt;
+}
+
+int Data::getPeriodsCnt()
+{
+	return this->periodsCnt;
+}
+
+int Data::getRoomsCnt()
+{
+	return this->roomsCnt;
+}

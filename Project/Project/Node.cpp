@@ -24,6 +24,11 @@ void Node::setAnswer(int index, int fst, int snd)
 	this->answers.at(index) = pair;
 }
 
+std::vector<std::pair<int, int>> Node::getAnswers() 
+{
+	return this->answers;
+}
+
 std::pair<int, int> Node::getAnswer(int index) const
 {
 	return this->answers.at(index);
@@ -75,3 +80,5 @@ bool operator!=(const Node& lhs, const Node& rhs)
 {
 	return !(lhs == rhs);
 }
+
+

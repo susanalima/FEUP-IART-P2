@@ -36,6 +36,10 @@ public:
 	std::vector<Period> getPeriods();
 	std::vector<Room> getRooms();
 
+	int getExamsCnt();
+	int getPeriodsCnt();
+	int getRoomsCnt();
+
 private:
 
 	void read();

@@ -18,6 +18,7 @@ public:
 	void addAnswer(std::pair<int, int> answer);
 	void setAnswer(int index, int fst, int snd);
 
+	std::vector<std::pair<int, int>> getAnswers() ;
 	std::pair<int, int> getAnswer(int index) const;
 	unsigned int getAnswersSize() const;
 	bool isRoomFree(std::pair<int, int> slot);

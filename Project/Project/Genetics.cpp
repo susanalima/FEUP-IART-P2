@@ -1,11 +1,11 @@
 #include "Genetics.h"
 
 #include <random>
+#include <iostream>
 
 
-Genetics::Genetics(Data* data, Node initial)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 2)
 {
-	Genetics(data, initial, 50, 1000, 20, 2);
 }
 
 Genetics::Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo)
@@ -30,23 +30,45 @@ Node Genetics::randomSelection(std::unordered_set<Node>* population)
 	return Node();
 }
 
+
 void Genetics::mutate(Node* elem)
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	int n = mt() % 101;  //random number between 0 and 100
+	int n = mt() % 100 + 1;  //random number between 1 and 100
 
-	if (n == 0)
+	if (n > this->mutationProbability)
 		return;
-	else if (n <= this->mutationProbability) {
-		//mutate
-	}
 
+	int nrOfMutations = mt() % elem->getAnswersSize() + 1;
+	int index, randomPeriod, randomRoom;
+
+	for (int i = 0; i < nrOfMutations; i++) {
+		 index = mt() % elem->getAnswersSize();
+		 randomPeriod = mt() % this->data->getPeriodsCnt() ;
+		 randomRoom = mt() % this->data->getRoomsCnt();
+		 elem->setAnswer(index, randomPeriod, randomRoom);
+	}
 }
 
+/*
+	pair<period, room>
+std::vector<std::pair<int, int>> answers; */
 Node Genetics::reproduce(Node* elem1, Node* elem2)
 {
-	return Node();
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	int c = mt() % elem1->getAnswersSize() ;
+
+	std::vector<std::pair<int, int>> elemAnswers = elem1->getAnswers();
+	std::vector<std::pair<int, int>> answers1(elemAnswers.begin(), elemAnswers.begin()+ c);
+	elemAnswers = elem2->getAnswers();
+	std::vector<std::pair<int, int>> answers2(elemAnswers.begin() + c, elemAnswers.begin() + elem2->getAnswersSize());
+	answers1.insert(answers1.end(), answers2.begin(), answers2.end());
+
+	Node child = Node();
+	child.setAnswers(answers1);
+	return child;
 }
 
 void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopulation, std::unordered_set<Node>* newPopulation)

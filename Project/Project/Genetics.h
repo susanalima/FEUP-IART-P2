@@ -22,6 +22,7 @@ public:
 
 	void printBest();
 
+
 private:
 
 	Node randomSelection(std::unordered_set<Node>* population);
