@@ -26,6 +26,9 @@ class Data {
 	std::vector<Period> periods;
 	std::vector<Room> rooms;
 
+	int maxPeriodPenalty;
+	int maxRoomPenalty;
+
 public:
 
 	Data();
@@ -39,6 +42,9 @@ public:
 	int getExamsCnt();
 	int getPeriodsCnt();
 	int getRoomsCnt();
+
+	int getMaxPeriodPenalty();
+	int getMaxRoomPenalty();
 
 private:
 

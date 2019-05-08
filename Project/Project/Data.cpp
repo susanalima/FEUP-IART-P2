@@ -97,6 +97,7 @@ void Data::readPeriods()
 
 			if (cnt == 4) {
 				Period period = Period(date, time, duration, penalty);
+				this->maxPeriodPenalty += penalty;
 				this->periods.push_back(period);
 			}
 		}
@@ -137,6 +138,7 @@ void Data::readRooms()
 
 			if (cnt == 2) {
 				Room room = Room(capacity, penalty);
+				this->maxRoomPenalty += penalty;
 				this->rooms.push_back(room);
 			}
 		}
@@ -209,4 +211,14 @@ int Data::getPeriodsCnt()
 int Data::getRoomsCnt()
 {
 	return this->roomsCnt;
+}
+
+int Data::getMaxPeriodPenalty()
+{
+	return this->maxPeriodPenalty;
+}
+
+int Data::getMaxRoomPenalty()
+{
+	return this->maxRoomPenalty;
 }

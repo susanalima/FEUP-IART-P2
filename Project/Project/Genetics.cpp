@@ -25,9 +25,16 @@ void Genetics::printBest()
 	this->best.print();
 }
 
+//change to choose from the best
 Node Genetics::randomSelection(std::unordered_set<Node>* population)
 {
-	return Node();
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	int n = mt() % population->size();
+	int index = 0;
+	auto it = population->begin();
+	std::advance(it, n);
+	return (*it);
 }
 
 
@@ -71,6 +78,7 @@ Node Genetics::reproduce(Node* elem1, Node* elem2)
 	return child;
 }
 
+//permite elitismo, manter os parentEliteNo progenitores na populaçao, se as suas penalties forem superiores ou iguais a melhor atual
 void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopulation, std::unordered_set<Node>* newPopulation)
 {
 
@@ -123,37 +131,50 @@ int Genetics::evaluateSolution(Node* solution)
 }
 
 
-//o best vai ser o que tiver menor penalty -> implica que so vai parar ao fim de maxNoGenerations, nunca sabe se ha ou nao um melhor
+//o best vai ser o que tiver menor penalty 
+//mudar para usar set normal com funçao de ordenaçao pela penalty do node (acresecentar field ao Node?)
 Node Genetics::solve(std::unordered_set<Node> population)
 {
+	int bestPenalty = -1;
+	int maxRoomPeriodPenalty = this->data->getMaxRoomPenalty() + this->data->getMaxPeriodPenalty();
+	Node elem1, elem2, child;
+	int penalty;
+
 	for (int generationsCount = 0; generationsCount < this->maxNoGenerations; generationsCount++) {
 
 		std::unordered_set<Node> newPopulation;
-		insertPopulationBestElements(&population, &newPopulation);
+		//insertPopulationBestElements(&population, &newPopulation);
 
-		int currentPopulationSize = 0;
-		Node elem1, elem2, child;
-		int penalty;
+		//todo refactor -> mudar para outra função
+		for (int currentPopulationSize = 0; currentPopulationSize < this->populationSize; currentPopulationSize++) {
 
-		while (currentPopulationSize < this->populationSize) {
-
-
-			elem1 = this->randomSelection(&newPopulation);
-			elem2 = this->randomSelection(&newPopulation);
-
+			elem1 = this->randomSelection(&population);
+			elem2 = this->randomSelection(&population);
+		
 			child = reproduce(&elem1, &elem2);
-
 			mutate(&child);
 
 			penalty = evaluateSolution(&child);
+			if (bestPenalty == -1 || penalty < bestPenalty) {
+				this->best = child;
+				bestPenalty = penalty;
+			}
 
+			if (penalty == 0
+				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
+					&& penalty == maxRoomPeriodPenalty)) {
+				this->best.print();
+				std::cout << "penalty : " << bestPenalty << std::endl;
+				return this->best;
+			}
+		
 			auto value = newPopulation.insert(child);
-
-			if (value.second)  // if the value was succesfully inserted
-				currentPopulationSize++;
 		}
+		population = newPopulation;
 	}
 
+	this->best.print();
+	std::cout << "penalty : " << bestPenalty << std::endl;
 	return this->best;
 }
 
