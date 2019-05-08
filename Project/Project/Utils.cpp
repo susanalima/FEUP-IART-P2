@@ -3,6 +3,7 @@
 #include <ctime>
 #include <sstream>
 
+
 Exam::Exam(int duration, int sCnt)
 {
 	this->duration = duration;
@@ -44,7 +45,7 @@ int Period::getDuration() const
 
 int Period::getPenalty() const
 {
-	return this->duration;
+	return this->penalty;
 }
 
 Room::Room(int capacity, int penalty)

@@ -22,12 +22,11 @@ public:
 
 	void printBest();
 
-
 private:
 
 	Node randomSelection(std::unordered_set<Node>* population);
 	void mutate(Node* elem );
 	Node reproduce(Node* elem1, Node* elem2);
 	void insertPopulationBestElements(std::unordered_set<Node>* prevPopulation, std::unordered_set<Node>* newPopulation);
-	
+	int evaluateSolution(Node* solution);
 };
