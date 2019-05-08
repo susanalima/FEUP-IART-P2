@@ -10,6 +10,9 @@ class Node {
 	*/
 	std::vector<std::pair<int, int>> answers;
 
+	int penalty;
+	int noFaults;
+
 public:
 
 	Node();
@@ -22,6 +25,12 @@ public:
 	std::pair<int, int> getAnswer(int index) const;
 	unsigned int getAnswersSize() const;
 	bool isRoomFree(std::pair<int, int> slot);
+
+	void incPenalty(int inc);
+	void incNoFaults(int inc);
+
+	int getPenalty();
+	int getNoFaults();
 
 	void print();
 };

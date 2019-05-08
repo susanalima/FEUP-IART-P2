@@ -86,10 +86,11 @@ void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopula
 
 //mudar penalidades mais pesadas para serem do estilo constante*nrExames ou algo assim
 // fazer refactoring nesta porra
-int Genetics::evaluateSolution(Node* solution)
+void Genetics::evaluateSolution(Node* solution)
 {
 
 	int penalty = 0; //the solution penalty / cost
+	int noFaults = 0;
 	std::vector<std::pair<int, int>> schedule = solution->getAnswers();
 
 	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
@@ -118,7 +119,7 @@ int Genetics::evaluateSolution(Node* solution)
 			it->second.second = it->second.second + exam.getStudentsCnt();
 
 			if (roomConstraint.compare("ROOM_EXCLUSIVE")) {  //TODO USE MACRO
-				penalty += 4000;
+				noFaults++;
 			}
 		}
 		else {
@@ -127,17 +128,28 @@ int Genetics::evaluateSolution(Node* solution)
 
 		std::multimap<int, std::pair<int, std::string>> periodConstraints = this->data->getPeriodConstraints();
 		auto  ret = periodConstraints.equal_range(i);
-
+		int exam2;
 		for (auto it = ret.first; it != ret.second; ++it) {
 			periodConstraint = it->second.second;
+			exam2 = it->second.first;
+
 			if (periodConstraint.compare("AFTER")) {
-				//do stuff
+				Period period2 = periods.at(schedule.at(exam2).first);
+				if (period.getDate() == period2.getDate()) {
+					if (period.getTime() <= period2.getTime())
+						noFaults++;
+				}
+				else if (period.getDate() < period2.getDate()) {
+					noFaults++;	
+				 }
 			}
 			else if (periodConstraint.compare("EXCLUSION")) {
-				//do stuff
+				if (periodIndex == schedule.at(exam2).first)
+					noFaults++;
 			}
 			else if (periodConstraint.compare("EXAM_COINCIDENCE")) {
-				//do stuff
+				if (periodIndex != schedule.at(exam2).first) //TODO CENA DAS SOBREPOSIÇOES DE ALUNOS
+					noFaults++;
 			}
 		}
 		
@@ -145,14 +157,15 @@ int Genetics::evaluateSolution(Node* solution)
 		penalty += period.getPenalty(); //penalty of using the period
 
 		if (period.getDuration() - it->second.first < 0)
-			penalty += 4000;  //penalty of exceding the period's duration
+			noFaults++;  //penalty of exceding the period's duration
 		if (room.getCapacity() - it->second.second < 0)
-			penalty += 4000;  //penalty of exceding the room's capacity
+			noFaults++;  //penalty of exceding the room's capacity
 
-		
 	}
 
-	return penalty;
+	solution->incNoFaults(noFaults);
+	solution->incPenalty(penalty);
+
 }
 
 
@@ -160,10 +173,9 @@ int Genetics::evaluateSolution(Node* solution)
 //mudar para usar set normal com funçao de ordenaçao pela penalty do node (acresecentar field ao Node?)
 Node Genetics::solve(std::unordered_set<Node> population)
 {
-	int bestPenalty = -1;
+	int bestPenalty = -1, bestNoFaults, penalty, noFaults;
 	int maxRoomPeriodPenalty = this->data->getMaxRoomPenalty() + this->data->getMaxPeriodPenalty();
 	Node elem1, elem2, child;
-	int penalty;
 
 	for (int generationsCount = 0; generationsCount < this->maxNoGenerations; generationsCount++) {
 
@@ -179,17 +191,22 @@ Node Genetics::solve(std::unordered_set<Node> population)
 			child = reproduce(&elem1, &elem2);
 			mutate(&child);
 
-			penalty = evaluateSolution(&child);
-			if (bestPenalty == -1 || penalty < bestPenalty) {
+			evaluateSolution(&child);
+			penalty = child.getPenalty();
+			noFaults = child.getNoFaults();
+			if (bestPenalty == -1 || (penalty <= bestPenalty && noFaults <= bestNoFaults) || noFaults < bestNoFaults) {
 				this->best = child;
 				bestPenalty = penalty;
+				bestNoFaults = noFaults;
 			}
 
-			if (penalty == 0
+			if (noFaults == 0 && (penalty == 0
 				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
-					&& penalty == maxRoomPeriodPenalty)) {
+					&& penalty == maxRoomPeriodPenalty))) {
+				
 				this->best.print();
-				std::cout << "penalty : " << bestPenalty << std::endl;
+				std::cout << this->best.getNoFaults() << std::endl;
+				std::cout << this->best.getPenalty() << std::endl;
 				return this->best;
 			}
 		
@@ -199,7 +216,8 @@ Node Genetics::solve(std::unordered_set<Node> population)
 	}
 
 	this->best.print();
-	std::cout << "penalty : " << bestPenalty << std::endl;
+	std::cout << this->best.getNoFaults() << std::endl;
+	std::cout << this->best.getPenalty() << std::endl;
 	return this->best;
 }
 

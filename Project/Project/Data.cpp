@@ -159,6 +159,10 @@ void Data::readRoomContraints()
 	std::ifstream input(this->roomConstraints_input);
 	if (input.good())
 	{
+
+		if (getline(input, line)) {
+		}
+
 		while (getline(input, line))
 		{
 			std::stringstream lineInput(line);
@@ -190,6 +194,9 @@ void Data::readPeriodContraints()
 	std::ifstream input(this->periodConstraints_input);
 	if (input.good())
 	{
+		if (getline(input, line)) {
+		}
+
 		while (getline(input, line))
 		{
 			std::stringstream lineInput(line);

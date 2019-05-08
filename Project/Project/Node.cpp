@@ -4,6 +4,8 @@
 
 Node::Node()
 {
+	this->penalty = 0;
+	this->noFaults = 0;
 }
 
 void Node::setAnswers(std::vector<std::pair<int, int>> answer)
@@ -48,6 +50,26 @@ bool Node::isRoomFree(std::pair<int, int> slot)
 			return false;
 	}
 	return true;
+}
+
+void Node::incPenalty(int inc)
+{
+	this->penalty += inc;
+}
+
+void Node::incNoFaults(int inc)
+{
+	this->noFaults += inc;
+}
+
+int Node::getPenalty()
+{
+	return this->penalty;
+}
+
+int Node::getNoFaults()
+{
+	return this->noFaults;
 }
 
 void Node::print()
