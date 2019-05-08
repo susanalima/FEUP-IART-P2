@@ -2,7 +2,7 @@
 
 #include <random>
 #include <iostream>
-#include <set>
+#include <map>
 
 Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 2)
 {
@@ -85,15 +85,20 @@ void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopula
 }
 
 //mudar penalidades mais pesadas para serem do estilo constante*nrExames ou algo assim
+// fazer refactoring nesta porra
 int Genetics::evaluateSolution(Node* solution)
 {
+
 	int penalty = 0; //the solution penalty / cost
 	std::vector<std::pair<int, int>> schedule = solution->getAnswers();
-	std::set<int> countPeriods;
+
+	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
+
 	std::vector<Exam> exams = this->data->getExams();
 	std::vector<Period> periods = this->data->getPeriods();
 	std::vector<Room> rooms = this->data->getRooms();
 	int roomIndex, periodIndex;
+	std::string roomConstraint, periodConstraint;
 
 	for (int i = 0; i < schedule.size(); i++) {
 
@@ -104,29 +109,49 @@ int Genetics::evaluateSolution(Node* solution)
 
 		roomIndex = schedule.at(i).second;
 		Room room = rooms.at(roomIndex);
+		
+		roomConstraint = this->data->getExamRoomConstraint(i);
 
-		auto value = countPeriods.insert(periodIndex);
-		if (!value.second)  // if the period is already being used
-			penalty += 2000;  //penalty of dupliated period
+		auto it = examSlot.find(schedule.at(i));
+		if (it != examSlot.end()) {
+			it->second.first = it->second.first + exam.getDuration();
+			it->second.second = it->second.second + exam.getStudentsCnt();
 
+			if (roomConstraint.compare("ROOM_EXCLUSIVE")) {  //TODO USE MACRO
+				penalty += 4000;
+			}
+		}
+		else {
+			it = (examSlot.insert(std::pair<std::pair<int, int>, std::pair<int, int>>(schedule.at(i), std::pair<int, int>(exam.getDuration(), exam.getStudentsCnt())))).first;
+		}
+
+		std::multimap<int, std::pair<int, std::string>> periodConstraints = this->data->getPeriodConstraints();
+		auto  ret = periodConstraints.equal_range(i);
+
+		for (auto it = ret.first; it != ret.second; ++it) {
+			periodConstraint = it->second.second;
+			if (periodConstraint.compare("AFTER")) {
+				//do stuff
+			}
+			else if (periodConstraint.compare("EXCLUSION")) {
+				//do stuff
+			}
+			else if (periodConstraint.compare("EXAM_COINCIDENCE")) {
+				//do stuff
+			}
+		}
+		
 		penalty += room.getPenalty(); //penalty of using the room
 		penalty += period.getPenalty(); //penalty of using the period
 
-		if (exam.getStudentsCnt() > room.getCapacity())
-			penalty += 1000;  //penalty of exceding the room's capacity
-		if (exam.getDuration() > period.getDuration())
-			penalty += 1000;  //penalty of exceding the period's duration
+		if (period.getDuration() - it->second.first < 0)
+			penalty += 4000;  //penalty of exceding the period's duration
+		if (room.getCapacity() - it->second.second < 0)
+			penalty += 4000;  //penalty of exceding the room's capacity
 
-		/*std::cout << periodIndex << ":" << roomIndex << "->" << exam.getDuration() << ":" << exam.getStudentsCnt() <<
-			"->" << period.getDuration() << ":" << period.getPenalty() << "->" << room.getCapacity() << ":" << room.getPenalty() <<
-			"->" << penalty << std::endl << std::endl;*/
-	
+		
 	}
-	//verificar se um periodo so e usado 1 vez (done)
-	//verificar se a capacidade das salas nao e excedida (done)
-	//verificar se a duraçao do exame nao excede a duraçao do periodo (done)
-	//verificar overlaps de estudantes
-	//etc
+
 	return penalty;
 }
 

@@ -21,6 +21,8 @@ void Data::read()
 	this->readExams();
 	this->readPeriods();
 	this->readRooms();
+	this->readRoomContraints();
+	this->readPeriodContraints();
 }
 
 void Data::readExams()
@@ -151,6 +153,71 @@ void Data::readRooms()
 	}
 }
 
+void Data::readRoomContraints()
+{
+	std::string line;
+	std::ifstream input(this->roomConstraints_input);
+	if (input.good())
+	{
+		while (getline(input, line))
+		{
+			std::stringstream lineInput(line);
+			std::string cell;
+
+			int room, cnt = 0;
+			std::string constraint;
+			while (getline(lineInput, cell, ','))
+			{
+				if (cnt == 0)
+					room = std::stoi(cell);
+				else if (cnt == 1)
+					constraint = cell;
+				cnt++;
+			}
+
+			if (cnt == 2) {
+				this->roomConstraints.insert(std::pair<int, std::string>(room, constraint));
+			}
+		}
+
+		input.close();
+	}
+}
+
+void Data::readPeriodContraints()
+{
+	std::string line;
+	std::ifstream input(this->periodConstraints_input);
+	if (input.good())
+	{
+		while (getline(input, line))
+		{
+			std::stringstream lineInput(line);
+			std::string cell;
+
+			int exam1, exam2, cnt = 0;
+			std::string constraint;
+			while (getline(lineInput, cell, ','))
+			{
+				if (cnt == 0)
+					exam1 = std::stoi(cell);
+				else if (cnt == 1)
+					constraint = cell;
+				else if (cnt == 2)
+					exam2 = std::stoi(cell);
+			
+				cnt++;
+			}
+
+			if (cnt == 3) {
+				this->periodConstraints.insert(std::pair<int, std::pair<int, std::string>>(exam1, std::pair<int, std::string>(exam2, constraint)));
+			}
+		}
+
+		input.close();
+	}
+}
+
 Node Data::generateInitialState()
 {
 	Node node;
@@ -221,4 +288,19 @@ int Data::getMaxPeriodPenalty()
 int Data::getMaxRoomPenalty()
 {
 	return this->maxRoomPenalty;
+}
+
+std::string Data::getExamRoomConstraint(int exam)
+{
+	std::string constraint = "";
+	auto it = this->roomConstraints.find(exam);
+	if (it != this->roomConstraints.end()) {
+		constraint = it->second;
+	}
+	return constraint;
+}
+
+std::multimap<int, std::pair<int, std::string>> Data::getPeriodConstraints()
+{
+	return this->periodConstraints;
 }

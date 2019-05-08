@@ -4,6 +4,8 @@
 #include "Node.h"
 
 #include <vector>
+#include <map>
+
 
 /*
 Considering a function with period penalty and room penalty
@@ -17,6 +19,8 @@ class Data {
 	const std::string exams_input = "exams.txt";
 	const std::string periods_input = "periods.txt";
 	const std::string rooms_input = "rooms.txt";
+	const std::string roomConstraints_input = "roomConstraints.txt";
+	const std::string periodConstraints_input = "periodConstraints.txt";
 
 	int examsCnt;
 	int periodsCnt;
@@ -28,6 +32,9 @@ class Data {
 
 	int maxPeriodPenalty;
 	int maxRoomPenalty;
+
+	std::map<int, std::string> roomConstraints;
+	std::multimap<int, std::pair<int, std::string>> periodConstraints;
 
 public:
 
@@ -46,11 +53,17 @@ public:
 	int getMaxPeriodPenalty();
 	int getMaxRoomPenalty();
 
+	std::string getExamRoomConstraint(int exam);
+
+	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints();
+
 private:
 
 	void read();
 	void readExams();
 	void readPeriods();
 	void readRooms();
+	void readRoomContraints();
+	void readPeriodContraints();
 
 };
