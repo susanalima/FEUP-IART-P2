@@ -29,14 +29,15 @@ public:
 	void incPenalty(int inc);
 	void incNoFaults(int inc);
 
-	int getPenalty();
-	int getNoFaults();
+	int getPenalty() const;
+	int getNoFaults() const;
 
 	void print();
 };
 
 bool operator==(const Node& lhs, const Node& rhs);
 bool operator!=(const Node& lhs, const Node& rhs);
+bool operator<(const Node& lhs, const Node& rhs);
 
 //TODO onde ponho isto?
 namespace std

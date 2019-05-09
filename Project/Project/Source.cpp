@@ -20,9 +20,13 @@ int main()
 	cout << endl << endl;
 
 	Genetics gn(&data, ini);
-	unordered_set<Node> population;
+	set<Node> population;
 	population.insert(ini);
-	gn.solve(population);
+	Node gnbest = gn.solve(population);
+	gnbest.print();
+	std::cout << gnbest.getNoFaults() << std::endl;
+	std::cout << gnbest.getPenalty() << std::endl;
+
 
 
 }

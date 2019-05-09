@@ -4,8 +4,9 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <iterator>     
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 2)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 3)
 {
 }
 
@@ -27,7 +28,7 @@ void Genetics::printBest()
 }
 
 //change to choose from the best
-Node Genetics::randomSelection(std::unordered_set<Node>* population)
+Node Genetics::randomSelection(std::set<Node>* population)
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
@@ -79,10 +80,15 @@ Node Genetics::reproduce(Node* elem1, Node* elem2)
 	return child;
 }
 
-//permite elitismo, manter os parentEliteNo progenitores na populaçao, se as suas penalties forem superiores ou iguais a melhor atual
-void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopulation, std::unordered_set<Node>* newPopulation)
+//permite elitismo, manter os parentEliteNo progenitores na populaçao
+void Genetics::insertPopulationBestElements(std::set<Node>* prevPopulation, std::set<Node>* newPopulation)
 {
-
+	int ad = this->parentEliteNo;
+	if (prevPopulation->size() < this->parentEliteNo)
+		ad = prevPopulation->size();
+	auto bg = prevPopulation->begin();
+	std::advance(bg, ad);
+	newPopulation->insert(prevPopulation->begin(), bg );
 }
 
 //mudar penalidades mais pesadas para serem do estilo constante*nrExames ou algo assim
@@ -97,9 +103,10 @@ void Genetics::evaluateSolution(Node* solution)
 	std::vector<Period> periods = this->data->getPeriods();
 	std::vector<Room> rooms = this->data->getRooms();
 
-	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
+	std::map<std::pair<int, int>, int> examSlot; //key : periodIndex, roomIndex, value: roomOcSpace
 	std::map<int, std::set<int>> periodDurations; //key periodIndex  value: set with durations of the exams -> used for Mixed Durations penalty
-	
+
+
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
 	for (int i = 0; i < schedule.size(); i++) {
@@ -108,10 +115,19 @@ void Genetics::evaluateSolution(Node* solution)
 
 		periodIndex = schedule.at(i).first;
 		Period period = periods.at(periodIndex);
+		auto itp = periodDurations.find(periodIndex);
+		if (itp != periodDurations.end()) {
+			itp->second.insert(exam.getDuration());
+		}
+		else {
+			std::set<int> durations;
+			durations.insert(exam.getDuration());
+			periodDurations.insert(std::pair<int, std::set<int>>(periodIndex, durations));
+		}
 
 		roomIndex = schedule.at(i).second;
 		Room room = rooms.at(roomIndex);
-
+	
 		noFaults += applyGeneralHardConstraints(i, &examSlot, &schedule, &exam, &period, &room);
 		noFaults += applyPeriodHardConstraints(i, &periods, &schedule, &period, periodIndex);
 
@@ -121,24 +137,14 @@ void Genetics::evaluateSolution(Node* solution)
 		auto it = find(examsSorted.begin(), examsSorted.end(), exam);
 		int pos = distance(examsSorted.begin(), it);
 		
-		/*InstitutionalWeightings instWeights = this->data->getInstWeights();
+		InstitutionalWeightings instWeights = this->data->getInstWeights();
 		int flNrExams = instWeights.getFrontLoad().getNrExams();
 		int flNrPeriods = instWeights.getFrontLoad().getNrExams();
 		int flPenalty = instWeights.getFrontLoad().getPenalty();
 
-		if (pos >= flNrExams && periodIndex >= flNrPeriods) //so funciona quando os periodos forem ordenados por "hora"
-			penalty += flPenalty;*/
+		if (pos >= flNrExams && periodIndex >= flNrPeriods) 
+			penalty += flPenalty;
 
-
-		auto itr = periodDurations.find(periodIndex);
-		if (itr != periodDurations.end()) {
-			itr->second.insert(exam.getDuration());
-		}
-		else {
-			std::set<int> durations;
-			durations.insert(exam.getDuration());
-			periodDurations.insert(std::pair<int, std::set<int>>(periodIndex, durations));
-		}
 		
 	}
 
@@ -184,27 +190,26 @@ int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *period
 }
 
 
-int Genetics::applyGeneralHardConstraints( int index, std::map<std::pair<int, int>, std::pair<int, int>>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room)
+int Genetics::applyGeneralHardConstraints( int index, std::map<std::pair<int, int>, int>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room)
 {
 	int noFaults = 0;
 	std::string roomConstraint = this->data->getExamRoomConstraint(index);
 
 	auto it = examSlot->find(schedule->at(index));
 	if (it != examSlot->end()) {
-		it->second.first = it->second.first + exam->getDuration();
-		it->second.second = it->second.second + exam->getStudentsCnt();
+		it->second = it->second + exam->getStudentsCnt();
 
 		if (roomConstraint.compare("ROOM_EXCLUSIVE") == 0) {  //TODO USE MACRO
 			noFaults++;
 		}
 	}
 	else {
-		it = (examSlot->insert(std::pair<std::pair<int, int>, std::pair<int, int>>(schedule->at(index), std::pair<int, int>(exam->getDuration(), exam->getStudentsCnt())))).first;
+		it = (examSlot->insert(std::pair<std::pair<int, int>, int>(schedule->at(index), exam->getStudentsCnt()))).first;
 	}
 
-	if (period->getDuration() - it->second.first < 0)
+	if (period->getDuration() < exam->getDuration())
 		noFaults++;  //penalty of exceding the period's duration
-	if (room->getCapacity() - it->second.second < 0)
+	if (room->getCapacity() < it->second )
 		noFaults++;  //penalty of exceding the room's capacity
 
 	return noFaults;
@@ -212,8 +217,7 @@ int Genetics::applyGeneralHardConstraints( int index, std::map<std::pair<int, in
 
 
 //o best vai ser o que tiver menor penalty 
-//mudar para usar set normal com funçao de ordenaçao pela penalty do node (acresecentar field ao Node?)
-Node Genetics::solve(std::unordered_set<Node> population)
+Node Genetics::solve(std::set<Node> population)
 {
 	int bestPenalty = -1, bestNoFaults, penalty, noFaults;
 	int maxRoomPeriodPenalty = this->data->getMaxRoomPenalty() + this->data->getMaxPeriodPenalty();
@@ -221,8 +225,8 @@ Node Genetics::solve(std::unordered_set<Node> population)
 
 	for (int generationsCount = 0; generationsCount < this->maxNoGenerations; generationsCount++) {
 
-		std::unordered_set<Node> newPopulation;
-		//insertPopulationBestElements(&population, &newPopulation);
+		std::set<Node> newPopulation;
+		insertPopulationBestElements(&population, &newPopulation);
 
 		//todo refactor -> mudar para outra função
 		for (int currentPopulationSize = 0; currentPopulationSize < this->populationSize; currentPopulationSize++) {
@@ -246,9 +250,6 @@ Node Genetics::solve(std::unordered_set<Node> population)
 				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
 					&& penalty == maxRoomPeriodPenalty))) {
 				
-				this->best.print();
-				std::cout << this->best.getNoFaults() << std::endl;
-				std::cout << this->best.getPenalty() << std::endl;
 				return this->best;
 			}
 		
@@ -256,10 +257,6 @@ Node Genetics::solve(std::unordered_set<Node> population)
 		}
 		population = newPopulation;
 	}
-
-	this->best.print();
-	std::cout << this->best.getNoFaults() << std::endl;
-	std::cout << this->best.getPenalty() << std::endl;
 	return this->best;
 }
 

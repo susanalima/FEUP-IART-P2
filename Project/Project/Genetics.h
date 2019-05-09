@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Data.h"
-#include <unordered_set>
+#include <set>
 
 class Genetics {
 
@@ -18,18 +18,18 @@ public:
 	Genetics(Data* data, Node initial);
 	Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo);
 	
-	Node solve(std::unordered_set<Node> population);
+	Node solve(std::set<Node> population);
 
 	void printBest();
 
 private:
 
-	Node randomSelection(std::unordered_set<Node>* population);
+	Node randomSelection(std::set<Node>* population);
 	void mutate(Node* elem );
 	Node reproduce(Node* elem1, Node* elem2);
-	void insertPopulationBestElements(std::unordered_set<Node>* prevPopulation, std::unordered_set<Node>* newPopulation);
+	void insertPopulationBestElements(std::set<Node>* prevPopulation, std::set<Node>* newPopulation);
 	void evaluateSolution(Node* solution);
 	int applyPeriodHardConstraints(int index, std::vector<Period>* periods, std::vector<std::pair<int, int>>* schedule, Period* period, int periodIndex);
-	int applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, std::pair<int, int>>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room);
+	int applyGeneralHardConstraints(int index, std::map<std::pair<int, int>,int>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room);
 
 };

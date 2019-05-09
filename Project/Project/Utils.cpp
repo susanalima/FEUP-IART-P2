@@ -322,17 +322,14 @@ bool operator==(const Time& lhs, const Time& rhs)
 
 bool operator<(const Period& lhs, const Period& rhs)
 {
-	if (lhs.getPenalty() < rhs.getPenalty())
-		return true;
-	else if (lhs.getPenalty() == rhs.getPenalty()) {
-		if (lhs.getDate() < rhs.getDate())
+	if (lhs.getDate() == rhs.getDate()) {
+		if (lhs.getTime() < rhs.getTime())
 			return true;
-		else if (lhs.getDate() == rhs.getDate()) {
-			if (lhs.getTime() < rhs.getTime())
+		else if (lhs.getTime() == rhs.getTime()) {
+			if (lhs.getDuration() < rhs.getDuration())
 				return true;
-			else if (lhs.getTime() == rhs.getTime()) {
-				if (lhs.getDuration() < rhs.getDuration())
-					return true;
+			else if (lhs.getDuration() == rhs.getDuration()) {
+				return lhs.getPenalty() < rhs.getPenalty();
 			}
 		}
 	}

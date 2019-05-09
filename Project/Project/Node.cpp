@@ -62,12 +62,12 @@ void Node::incNoFaults(int inc)
 	this->noFaults += inc;
 }
 
-int Node::getPenalty()
+int Node::getPenalty() const
 {
 	return this->penalty;
 }
 
-int Node::getNoFaults()
+int Node::getNoFaults() const
 {
 	return this->noFaults;
 }
@@ -101,6 +101,14 @@ bool operator==(const Node& lhs, const Node& rhs)
 bool operator!=(const Node& lhs, const Node& rhs)
 {
 	return !(lhs == rhs);
+}
+
+bool operator<(const Node& lhs, const Node& rhs)
+{
+	if (lhs.getNoFaults() == rhs.getNoFaults())
+		return lhs.getPenalty() < rhs.getPenalty();
+	else
+		return lhs.getNoFaults() < rhs.getNoFaults();
 }
 
 
