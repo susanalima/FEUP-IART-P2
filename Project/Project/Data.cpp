@@ -17,6 +17,23 @@ Data::Data()
 
 	std::sort(this->periods.begin(), this->periods.end());
 	std::sort(this->rooms.begin(), this->rooms.end());
+
+	buildPeriodDays();
+}
+
+void Data::buildPeriodDays() {
+	for (int i = 0; i < this->periods.size(); i++) {
+		std::string sDate = this->periods.at(i).getDate().getDate();
+		auto it = this->periodDays.find(sDate);
+		if (it != this->periodDays.end()) {
+			it->second.push_back(i);
+		}
+		else {
+			std::vector<int> periods;
+			periods.push_back(i);
+			periodDays.insert(std::pair<std::string, std::vector<int>>(sDate, periods));
+		}
+	}
 }
 
 void Data::read()
@@ -380,5 +397,10 @@ std::multimap<int, std::pair<int, std::string>> Data::getPeriodConstraints() con
 InstitutionalWeightings Data::getInstWeights() const
 {
 	return this->instWeights;
+}
+
+std::map<std::string, std::vector<int>> Data::getPeriodDays() const
+{
+	return this->periodDays;
 }
 

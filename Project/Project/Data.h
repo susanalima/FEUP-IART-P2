@@ -36,6 +36,7 @@ class Data {
 
 	std::map<int, std::string> roomConstraints;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints;
+	std::map<std::string, std::vector<int>> periodDays; //TODO mudar este nome que nao é o mais feliz
 
 	InstitutionalWeightings instWeights;
 
@@ -59,6 +60,7 @@ public:
 	std::string getExamRoomConstraint(int exam) const;
 	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints() const;
 	InstitutionalWeightings getInstWeights() const;
+	std::map<std::string, std::vector<int>> getPeriodDays() const;
 
 private:
 
@@ -69,6 +71,7 @@ private:
 	void readRoomContraints();
 	void readPeriodContraints();
 	void readInstWeights();
+	void buildPeriodDays();
 
 
 };

@@ -27,6 +27,4 @@ int main()
 	std::cout << gnbest.getNoFaults() << std::endl;
 	std::cout << gnbest.getPenalty() << std::endl;
 
-
-
 }

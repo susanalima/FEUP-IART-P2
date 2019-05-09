@@ -24,6 +24,7 @@ class Date {
 	int day;
 	int month;
 	int year;
+	std::string date;
 
 public:
 	Date();
@@ -32,6 +33,7 @@ public:
 	int getDay() const;
 	int getMonth() const;
 	int getYear() const;
+	std::string getDate() const;
 };
 
 class Exam {

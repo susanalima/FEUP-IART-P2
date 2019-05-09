@@ -142,10 +142,12 @@ Date::Date()
 	this->day = ltm.tm_mday;
 	this->month = ltm.tm_mon;
 	this->year = ltm.tm_year;
+	this->date = std::to_string(this->day) + ":" + std::to_string(this->month) + ":" + std::to_string(this->year);
 }
 
 Date::Date(std::string date)
 {
+	this->date = date;
 	this->day = 0;
 	this->month = 0;
 	this->year = 0;
@@ -185,6 +187,11 @@ int Date::getMonth() const
 int Date::getYear() const
 {
 	return this->year;
+}
+
+std::string Date::getDate() const
+{
+	return this->date;
 }
 
 
@@ -339,6 +346,8 @@ bool operator==(const Time& lhs, const Time& rhs)
 
 bool operator<(const Period& lhs, const Period& rhs)
 {
+	if (lhs.getDate() < rhs.getDate())
+		return true;
 	if (lhs.getDate() == rhs.getDate()) {
 		if (lhs.getTime() < rhs.getTime())
 			return true;

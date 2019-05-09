@@ -107,6 +107,8 @@ void Genetics::evaluateSolution(Node* solution)
 	//key : periodIndex
 	//value : pair : set -> key = exam duration ; vector : exam index
 
+	std::map<std::string, std::vector<int>> examDays;
+
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
 	for (int i = 0; i < schedule.size(); i++) {
@@ -151,9 +153,26 @@ void Genetics::evaluateSolution(Node* solution)
 
 	}
 
+	std::map<std::string, std::vector<int>> periodDays = this->data->getPeriodDays();
+
 	for (auto it = periodInfo.begin(); it != periodInfo.end(); it++){
 		penalty += (it->second.first.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
 		std::vector<int> periodExams = it->second.second;
+
+		std::string sDate = periods.at(it->first).getDate().getDate();
+		std::vector<int> sameDayPeriods = periodDays[sDate];
+
+		/*for (int i = 0; i < sameDayPeriods.size(); i++)
+			std::cout << sameDayPeriods.at(i) << std::endl;
+
+		std::cout << std::endl << std::endl;*/
+
+		int nextPeriod = it->first + 1;
+
+		if (std::find(sameDayPeriods.begin(), sameDayPeriods.end(), nextPeriod) != sameDayPeriods.end()) {
+			/* v contains x */
+			//ver os overlaps
+		}
 
 		for (int i = 0; i < periodExams.size() ; i++) {
 			Exam e1 = exams.at(periodExams.at(i));
@@ -163,10 +182,16 @@ void Genetics::evaluateSolution(Node* solution)
 					noFaults++;
 				} 
 			}
+
+			//ciclo do overlaps -> ir buscar todos os exames do periodo a seguir (nextPeriod) e comparar com os deste periodo
+			/*for (int j = 0; j < periodExams.size(); j++) {
+				Exam e2 = exams.at(periodExams.at(j));
+				if (e1.getOverlappingStudents(&e2).size() != 0) {
+					noFaults++;
+				}
+			*/
 		}
 	}
-
-
 
 	solution->incNoFaults(noFaults);
 	solution->incPenalty(penalty);
