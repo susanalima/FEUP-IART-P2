@@ -2,12 +2,14 @@
 
 #include <ctime>
 #include <sstream>
+#include <random>
 
 
-Exam::Exam(int duration, int sCnt)
+Exam::Exam(int duration, std::vector<int> students)
 {
 	this->duration = duration;
-	this->studentsCnt = sCnt;
+	this->students = students;
+	std::sort(this->students.begin(), this->students.end());
 }
 
 int Exam::getDuration() const
@@ -17,7 +19,12 @@ int Exam::getDuration() const
 
 int Exam::getStudentsCnt() const
 {
-	return this->studentsCnt;
+	return this->students.size();
+}
+
+std::vector<int> Exam::getStudents() const
+{
+	return this->students;
 }
 
 Period::Period(Date date, Time time, int duration, int penalty)

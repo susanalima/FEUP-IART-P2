@@ -45,20 +45,21 @@ void Data::readExams()
 			std::stringstream lineInput(line);
 			std::string cell;
 
-			int duration, students, cnt = 0;
+			std::vector<int> students;
+			int duration, cnt = 0;
 			while (getline(lineInput, cell, ','))
 			{
 				if (cnt == 0)
 					duration = std::stoi(cell);
-				else if(cnt == 1)
-					students = std::stoi(cell);
+				else
+					students.push_back(std::stoi(cell));
 				cnt++;
 			}
 
-			if (cnt == 2) {
-				Exam exam = Exam(duration, students);
-				this->exams.push_back(exam);
-			}
+
+			Exam exam = Exam(duration, students);
+			this->exams.push_back(exam);
+			
 		}
 
 		if (this->examsCnt != this->exams.size()) {
@@ -321,32 +322,32 @@ int Data::getStateValue(Node solution)
 	return value;
 }
 
-std::vector<Exam> Data::getExams()
+std::vector<Exam> Data::getExams() const
 {
 	return this->exams;
 }
 
-std::vector<Period> Data::getPeriods()
+std::vector<Period> Data::getPeriods() const
 {
 	return this->periods;
 }
 
-std::vector<Room> Data::getRooms()
+std::vector<Room> Data::getRooms() const
 {
 	return this->rooms;
 }
 
-int Data::getExamsCnt()
+int Data::getExamsCnt() const
 {
 	return this->examsCnt;
 }
 
-int Data::getPeriodsCnt()
+int Data::getPeriodsCnt() const
 {
 	return this->periodsCnt;
 }
 
-int Data::getRoomsCnt()
+int Data::getRoomsCnt() const
 {
 	return this->roomsCnt;
 }
@@ -380,3 +381,4 @@ InstitutionalWeightings Data::getInstWeights() const
 {
 	return this->instWeights;
 }
+

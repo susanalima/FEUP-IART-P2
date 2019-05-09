@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class Time {
 
@@ -36,12 +37,14 @@ public:
 class Exam {
 
 	int duration;
-	int studentsCnt;
+	//int studentsCnt;
+	std::vector<int> students;
 
 public:
-	Exam(int duration, int sCnt);
+	Exam(int duration, std::vector<int> students);
 	int getDuration() const;
 	int getStudentsCnt() const;
+	std::vector<int> getStudents() const;
 
 };
 

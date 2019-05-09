@@ -39,16 +39,3 @@ bool operator==(const Node& lhs, const Node& rhs);
 bool operator!=(const Node& lhs, const Node& rhs);
 bool operator<(const Node& lhs, const Node& rhs);
 
-//TODO onde ponho isto?
-namespace std
-{
-	template<>
-	struct hash<Node>
-	{
-		size_t
-			operator()(const Node& obj) const
-		{
-			return hash<int>()(obj.getAnswersSize());
-		}
-	};
-}

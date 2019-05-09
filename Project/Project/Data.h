@@ -45,13 +45,13 @@ public:
 	Node generateInitialState();
 	int getStateValue(Node solution);
 
-	std::vector<Exam> getExams();
-	std::vector<Period> getPeriods();
-	std::vector<Room> getRooms();
+	std::vector<Exam> getExams() const;
+	std::vector<Period> getPeriods() const;
+	std::vector<Room> getRooms() const;
 
-	int getExamsCnt();
-	int getPeriodsCnt();
-	int getRoomsCnt();
+	int getExamsCnt() const;
+	int getPeriodsCnt() const;
+	int getRoomsCnt() const;
 
 	int getMaxPeriodPenalty() const;
 	int getMaxRoomPenalty() const;

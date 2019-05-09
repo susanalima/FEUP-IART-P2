@@ -91,7 +91,6 @@ void Genetics::insertPopulationBestElements(std::set<Node>* prevPopulation, std:
 	newPopulation->insert(prevPopulation->begin(), bg );
 }
 
-//mudar penalidades mais pesadas para serem do estilo constante*nrExames ou algo assim
 // fazer refactoring nesta porra
 void Genetics::evaluateSolution(Node* solution)
 {
@@ -145,7 +144,6 @@ void Genetics::evaluateSolution(Node* solution)
 		if (pos >= flNrExams && periodIndex >= flNrPeriods) 
 			penalty += flPenalty;
 
-		
 	}
 
 	for (auto it = periodDurations.begin(); it != periodDurations.end(); it++){
