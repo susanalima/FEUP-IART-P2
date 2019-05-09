@@ -3,6 +3,7 @@
 #include <random>
 #include <iostream>
 #include <map>
+#include <set>
 
 Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 2)
 {
@@ -89,13 +90,16 @@ void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopula
 void Genetics::evaluateSolution(Node* solution)
 {
 	int penalty = 0, noFaults = 0, roomIndex, periodIndex;
+	std::string roomConstraint, periodConstraint;
+
 	std::vector<std::pair<int, int>> schedule = solution->getAnswers();
-	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
 	std::vector<Exam> exams = this->data->getExams(), examsSorted = exams;
 	std::vector<Period> periods = this->data->getPeriods();
 	std::vector<Room> rooms = this->data->getRooms();
-	std::string roomConstraint, periodConstraint;
 
+	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
+	std::map<int, std::set<int>> periodDurations; //key periodIndex  value: set with durations of the exams -> used for Mixed Durations penalty
+	
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
 	for (int i = 0; i < schedule.size(); i++) {
@@ -114,9 +118,32 @@ void Genetics::evaluateSolution(Node* solution)
 		penalty += room.getPenalty(); //penalty of using the room
 		penalty += period.getPenalty(); //penalty of using the period
 
-		//auto it = find(examsSorted.begin(), examsSorted.end(), exam);
-		//int pos = distance(examsSorted.begin(), it);
+		auto it = find(examsSorted.begin(), examsSorted.end(), exam);
+		int pos = distance(examsSorted.begin(), it);
+		
+		/*InstitutionalWeightings instWeights = this->data->getInstWeights();
+		int flNrExams = instWeights.getFrontLoad().getNrExams();
+		int flNrPeriods = instWeights.getFrontLoad().getNrExams();
+		int flPenalty = instWeights.getFrontLoad().getPenalty();
 
+		if (pos >= flNrExams && periodIndex >= flNrPeriods) //so funciona quando os periodos forem ordenados por "hora"
+			penalty += flPenalty;*/
+
+
+		auto itr = periodDurations.find(periodIndex);
+		if (itr != periodDurations.end()) {
+			itr->second.insert(exam.getDuration());
+		}
+		else {
+			std::set<int> durations;
+			durations.insert(exam.getDuration());
+			periodDurations.insert(std::pair<int, std::set<int>>(periodIndex, durations));
+		}
+		
+	}
+
+	for (auto it = periodDurations.begin(); it != periodDurations.end(); it++){
+		penalty += (it->second.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
 	}
 
 	solution->incNoFaults(noFaults);
@@ -132,7 +159,7 @@ int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *period
 	for (auto it = ret.first; it != ret.second; ++it) {
 		periodConstraint = it->second.second;
 		exam2 = it->second.first;
-
+	
 		if (periodConstraint.compare("AFTER") == 0) {
 			Period period2 = periods->at(schedule->at(exam2).first);
 			if (period->getDate() == period2.getDate()) {
@@ -167,7 +194,7 @@ int Genetics::applyGeneralHardConstraints( int index, std::map<std::pair<int, in
 		it->second.first = it->second.first + exam->getDuration();
 		it->second.second = it->second.second + exam->getStudentsCnt();
 
-		if (roomConstraint.compare("ROOM_EXCLUSIVE")) {  //TODO USE MACRO
+		if (roomConstraint.compare("ROOM_EXCLUSIVE") == 0) {  //TODO USE MACRO
 			noFaults++;
 		}
 	}

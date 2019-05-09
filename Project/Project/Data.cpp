@@ -184,6 +184,8 @@ void Data::readRoomContraints()
 			}
 
 			if (cnt == 2) {
+				auto end_pos = std::remove(constraint.begin(), constraint.end(), ' ');
+				constraint.erase(end_pos, constraint.end());
 				this->roomConstraints.insert(std::pair<int, std::string>(room, constraint));
 			}
 		}
@@ -221,6 +223,8 @@ void Data::readPeriodContraints()
 			}
 
 			if (cnt == 3) {
+				auto end_pos = std::remove(constraint.begin(), constraint.end(), ' ');
+				constraint.erase(end_pos, constraint.end());
 				this->periodConstraints.insert(std::pair<int, std::pair<int, std::string>>(exam1, std::pair<int, std::string>(exam2, constraint)));
 			}
 		}
@@ -347,17 +351,17 @@ int Data::getRoomsCnt()
 	return this->roomsCnt;
 }
 
-int Data::getMaxPeriodPenalty()
+int Data::getMaxPeriodPenalty() const
 {
 	return this->maxPeriodPenalty;
 }
 
-int Data::getMaxRoomPenalty()
+int Data::getMaxRoomPenalty() const
 {
 	return this->maxRoomPenalty;
 }
 
-std::string Data::getExamRoomConstraint(int exam)
+std::string Data::getExamRoomConstraint(int exam) const
 {
 	std::string constraint = "";
 	auto it = this->roomConstraints.find(exam);
@@ -367,7 +371,12 @@ std::string Data::getExamRoomConstraint(int exam)
 	return constraint;
 }
 
-std::multimap<int, std::pair<int, std::string>> Data::getPeriodConstraints()
+std::multimap<int, std::pair<int, std::string>> Data::getPeriodConstraints() const
 {
 	return this->periodConstraints;
+}
+
+InstitutionalWeightings Data::getInstWeights() const
+{
+	return this->instWeights;
 }

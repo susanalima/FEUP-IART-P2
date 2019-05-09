@@ -53,12 +53,12 @@ public:
 	int getPeriodsCnt();
 	int getRoomsCnt();
 
-	int getMaxPeriodPenalty();
-	int getMaxRoomPenalty();
+	int getMaxPeriodPenalty() const;
+	int getMaxRoomPenalty() const;
 
-	std::string getExamRoomConstraint(int exam);
-
-	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints();
+	std::string getExamRoomConstraint(int exam) const;
+	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints() const;
+	InstitutionalWeightings getInstWeights() const;
 
 private:
 
