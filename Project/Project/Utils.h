@@ -73,6 +73,43 @@ public:
 
 };
 
+
+class FrontLoad {
+
+	int nrExams;
+	int nrPeriods;
+	int penalty;
+
+public:
+	FrontLoad();
+	FrontLoad(int nrExams, int nrPeriods, int penalty);
+	int getNrExams() const;
+	int getNrPeriods() const;
+	int getPenalty() const;
+
+};
+
+class InstitutionalWeightings {
+
+	int twoInRow;
+	int twoInDay;
+	int periodSpreed;
+	int nonMixedDurations;
+	FrontLoad frontLoad;
+
+public:
+	
+	InstitutionalWeightings();
+	InstitutionalWeightings(int twoInRow, int twoInDay, int periodSpreed, int nonMixedDurations, int nrExams, int nrPeriods, int penalty);
+	int getTwoInRow() const;
+	int getTwoInDay() const;
+	int getPeriodSpreed() const;
+	int getNonMixedDurations() const;
+	FrontLoad getFrontLoad() const;
+};
+
+
+
 bool operator< (const Date& lhs, const Date& rhs);
 bool operator> (const Date& lhs, const Date& rhs);
 bool operator<=(const Date& lhs, const Date& rhs);
@@ -96,5 +133,8 @@ bool operator> (const Room& lhs, const Room& rhs);
 bool operator<=(const Room& lhs, const Room& rhs);
 bool operator>=(const Room& lhs, const Room& rhs);
 bool operator==(const Room& lhs, const Room& rhs);
+
+bool operator< (const Exam& lhs, const Exam& rhs);
+bool operator==(const Exam& lhs, const Exam& rhs);
 
 

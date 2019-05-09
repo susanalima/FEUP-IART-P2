@@ -170,6 +170,86 @@ int Date::getYear() const
 	return this->year;
 }
 
+
+FrontLoad::FrontLoad() : FrontLoad(0,0,0)
+{
+}
+
+FrontLoad::FrontLoad(int nrExams, int nrPeriods, int penalty)
+{
+	this->nrExams = nrExams;
+	this->nrPeriods = nrPeriods;
+	this->penalty = penalty;
+}
+
+int FrontLoad::getNrExams() const
+{
+	return this->nrExams;
+}
+
+int FrontLoad::getNrPeriods() const
+{
+	return this->nrPeriods;
+}
+
+int FrontLoad::getPenalty() const
+{
+	return this->penalty;
+}
+
+InstitutionalWeightings::InstitutionalWeightings() 
+{
+	this->twoInRow = 0;
+	this->twoInDay = 0;
+	this->periodSpreed = 0;
+	this->nonMixedDurations = 0;
+	FrontLoad frontload();
+	this->frontLoad = frontLoad;
+}
+
+
+InstitutionalWeightings::InstitutionalWeightings(int twoInRow, int twoInDay, int periodSpreed, int nonMixedDurations, int nrExams, int nrPeriods, int penalty)
+{
+	this->twoInRow = twoInRow;
+	this->twoInDay = twoInDay;
+	this->periodSpreed = periodSpreed;
+	this->nonMixedDurations = nonMixedDurations;
+	this->frontLoad = FrontLoad(nrExams, nrPeriods, penalty);
+}
+
+int InstitutionalWeightings::getTwoInRow() const
+{
+	return this->twoInRow;
+}
+
+int InstitutionalWeightings::getTwoInDay() const
+{
+	return this->twoInDay;
+}
+
+int InstitutionalWeightings::getPeriodSpreed() const
+{
+	return this->periodSpreed;
+}
+
+int InstitutionalWeightings::getNonMixedDurations() const
+{
+	return this->nonMixedDurations;
+}
+
+FrontLoad InstitutionalWeightings::getFrontLoad() const
+{
+	return this->frontLoad;
+}
+
+
+
+
+
+
+
+
+
 bool operator<(const Date& lhs, const Date& rhs)
 {
 	if (lhs.getYear() < rhs.getYear())
@@ -308,4 +388,14 @@ bool operator>=(const Room& lhs, const Room& rhs)
 bool operator==(const Room& lhs, const Room& rhs)
 {
 	return lhs.getCapacity() == rhs.getCapacity() && lhs.getPenalty() == rhs.getPenalty();
+}
+
+bool operator<(const Exam& lhs, const Exam& rhs)
+{
+	return lhs.getStudentsCnt() < rhs.getStudentsCnt();
+}
+
+bool operator==(const Exam& lhs, const Exam& rhs)
+{
+	return lhs.getStudentsCnt() == rhs.getStudentsCnt();
 }

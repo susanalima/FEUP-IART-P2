@@ -10,6 +10,9 @@ Data::Data()
 	this->examsCnt = 0;
 	this->periodsCnt = 0;
 	this->roomsCnt = 0;
+	this->maxPeriodPenalty = 0;
+	this->maxRoomPenalty = 0;
+
 	this->read();
 
 	std::sort(this->periods.begin(), this->periods.end());
@@ -23,6 +26,7 @@ void Data::read()
 	this->readRooms();
 	this->readRoomContraints();
 	this->readPeriodContraints();
+	this->readInstWeights();
 }
 
 void Data::readExams()
@@ -219,6 +223,62 @@ void Data::readPeriodContraints()
 			if (cnt == 3) {
 				this->periodConstraints.insert(std::pair<int, std::pair<int, std::string>>(exam1, std::pair<int, std::string>(exam2, constraint)));
 			}
+		}
+
+		input.close();
+	}
+}
+
+void Data::readInstWeights()
+{
+	std::string line;
+	std::ifstream input(this->institutionalWeightings_input);
+	if (input.good())
+	{
+		if (getline(input, line)) {
+		}
+
+	
+		int twoInRow, twoInDay, periodSpread, nonMixedDurations, nrExams, nrPeriods, penalty;
+		while (getline(input, line))
+		{
+			std::stringstream lineInput(line);
+			std::string cell;
+
+			int p1,p2,p3, cnt = 0;
+			std::string constraint;
+			while (getline(lineInput, cell, ','))
+			{
+				if (cnt == 0)
+					constraint = cell;
+				else if (cnt == 1)
+					p1 = std::stoi(cell);
+				else if (cnt == 2)
+					p2 = std::stoi(cell);
+				else if (cnt == 3)
+					p3 = std::stoi(cell);
+
+				cnt++;
+			}
+			
+			if (constraint.compare("TWOINAROW") == 0) {
+				twoInRow = p1;
+			}
+			else if (constraint.compare("TWOINADAY") == 0) {
+				twoInDay = p1;
+			}
+			else if (constraint.compare("PERIODSPREAD") == 0) {
+				periodSpread = p1;
+			}
+			else if (constraint.compare("NONMIXEDDURATIONS") == 0) {
+				nonMixedDurations = p1;
+			}
+			else if (constraint.compare("FRONTLOAD") == 0) {
+				nrExams = p1;
+				nrPeriods = p2;
+				penalty = p3;
+				this->instWeights = InstitutionalWeightings(twoInRow, twoInDay, periodSpread, nonMixedDurations, nrExams, nrPeriods, penalty);
+			}	
 		}
 
 		input.close();

@@ -21,6 +21,7 @@ class Data {
 	const std::string rooms_input = "rooms.txt";
 	const std::string roomConstraints_input = "roomConstraints.txt";
 	const std::string periodConstraints_input = "periodConstraints.txt";
+	const std::string institutionalWeightings_input = "institutionalWeightings.txt";
 
 	int examsCnt;
 	int periodsCnt;
@@ -35,6 +36,8 @@ class Data {
 
 	std::map<int, std::string> roomConstraints;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints;
+
+	InstitutionalWeightings instWeights;
 
 public:
 
@@ -65,5 +68,7 @@ private:
 	void readRooms();
 	void readRoomContraints();
 	void readPeriodContraints();
+	void readInstWeights();
+
 
 };

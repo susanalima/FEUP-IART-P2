@@ -88,18 +88,15 @@ void Genetics::insertPopulationBestElements(std::unordered_set<Node>* prevPopula
 // fazer refactoring nesta porra
 void Genetics::evaluateSolution(Node* solution)
 {
-
-	int penalty = 0; //the solution penalty / cost
-	int noFaults = 0;
+	int penalty = 0, noFaults = 0, roomIndex, periodIndex;
 	std::vector<std::pair<int, int>> schedule = solution->getAnswers();
-
 	std::map<std::pair<int, int>, std::pair<int, int>> examSlot; //key : periodIndex, roomIndex, value: periodOcTime roomOcSpace
-
-	std::vector<Exam> exams = this->data->getExams();
+	std::vector<Exam> exams = this->data->getExams(), examsSorted = exams;
 	std::vector<Period> periods = this->data->getPeriods();
 	std::vector<Room> rooms = this->data->getRooms();
-	int roomIndex, periodIndex;
 	std::string roomConstraint, periodConstraint;
+
+	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
 	for (int i = 0; i < schedule.size(); i++) {
 
@@ -110,62 +107,80 @@ void Genetics::evaluateSolution(Node* solution)
 
 		roomIndex = schedule.at(i).second;
 		Room room = rooms.at(roomIndex);
-		
-		roomConstraint = this->data->getExamRoomConstraint(i);
 
-		auto it = examSlot.find(schedule.at(i));
-		if (it != examSlot.end()) {
-			it->second.first = it->second.first + exam.getDuration();
-			it->second.second = it->second.second + exam.getStudentsCnt();
+		noFaults += applyGeneralHardConstraints(i, &examSlot, &schedule, &exam, &period, &room);
+		noFaults += applyPeriodHardConstraints(i, &periods, &schedule, &period, periodIndex);
 
-			if (roomConstraint.compare("ROOM_EXCLUSIVE")) {  //TODO USE MACRO
-				noFaults++;
-			}
-		}
-		else {
-			it = (examSlot.insert(std::pair<std::pair<int, int>, std::pair<int, int>>(schedule.at(i), std::pair<int, int>(exam.getDuration(), exam.getStudentsCnt())))).first;
-		}
-
-		std::multimap<int, std::pair<int, std::string>> periodConstraints = this->data->getPeriodConstraints();
-		auto  ret = periodConstraints.equal_range(i);
-		int exam2;
-		for (auto it = ret.first; it != ret.second; ++it) {
-			periodConstraint = it->second.second;
-			exam2 = it->second.first;
-
-			if (periodConstraint.compare("AFTER")) {
-				Period period2 = periods.at(schedule.at(exam2).first);
-				if (period.getDate() == period2.getDate()) {
-					if (period.getTime() <= period2.getTime())
-						noFaults++;
-				}
-				else if (period.getDate() < period2.getDate()) {
-					noFaults++;	
-				 }
-			}
-			else if (periodConstraint.compare("EXCLUSION")) {
-				if (periodIndex == schedule.at(exam2).first)
-					noFaults++;
-			}
-			else if (periodConstraint.compare("EXAM_COINCIDENCE")) {
-				if (periodIndex != schedule.at(exam2).first) //TODO CENA DAS SOBREPOSIÇOES DE ALUNOS
-					noFaults++;
-			}
-		}
-		
 		penalty += room.getPenalty(); //penalty of using the room
 		penalty += period.getPenalty(); //penalty of using the period
 
-		if (period.getDuration() - it->second.first < 0)
-			noFaults++;  //penalty of exceding the period's duration
-		if (room.getCapacity() - it->second.second < 0)
-			noFaults++;  //penalty of exceding the room's capacity
+		//auto it = find(examsSorted.begin(), examsSorted.end(), exam);
+		//int pos = distance(examsSorted.begin(), it);
 
 	}
 
 	solution->incNoFaults(noFaults);
 	solution->incPenalty(penalty);
+}
 
+int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *periods, std::vector<std::pair<int, int>>* schedule, Period* period,  int periodIndex)
+{
+	std::string periodConstraint;
+	std::multimap<int, std::pair<int, std::string>> periodConstraints = this->data->getPeriodConstraints();
+	auto  ret = periodConstraints.equal_range(index);
+	int exam2, noFaults = 0;
+	for (auto it = ret.first; it != ret.second; ++it) {
+		periodConstraint = it->second.second;
+		exam2 = it->second.first;
+
+		if (periodConstraint.compare("AFTER") == 0) {
+			Period period2 = periods->at(schedule->at(exam2).first);
+			if (period->getDate() == period2.getDate()) {
+				if (period->getTime() <= period2.getTime())
+					noFaults++;
+			}
+			else if (period->getDate() < period2.getDate()) {
+				noFaults++;
+			}
+		}
+		else if (periodConstraint.compare("EXCLUSION") == 0) {
+			if (periodIndex == schedule->at(exam2).first)
+				noFaults++;
+		}
+		else if (periodConstraint.compare("EXAM_COINCIDENCE") == 0) {
+			if (periodIndex != schedule->at(exam2).first) //TODO CENA DAS SOBREPOSIÇOES DE ALUNOS
+				noFaults++;
+		}
+	}
+
+	return noFaults;
+}
+
+
+int Genetics::applyGeneralHardConstraints( int index, std::map<std::pair<int, int>, std::pair<int, int>>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room)
+{
+	int noFaults = 0;
+	std::string roomConstraint = this->data->getExamRoomConstraint(index);
+
+	auto it = examSlot->find(schedule->at(index));
+	if (it != examSlot->end()) {
+		it->second.first = it->second.first + exam->getDuration();
+		it->second.second = it->second.second + exam->getStudentsCnt();
+
+		if (roomConstraint.compare("ROOM_EXCLUSIVE")) {  //TODO USE MACRO
+			noFaults++;
+		}
+	}
+	else {
+		it = (examSlot->insert(std::pair<std::pair<int, int>, std::pair<int, int>>(schedule->at(index), std::pair<int, int>(exam->getDuration(), exam->getStudentsCnt())))).first;
+	}
+
+	if (period->getDuration() - it->second.first < 0)
+		noFaults++;  //penalty of exceding the period's duration
+	if (room->getCapacity() - it->second.second < 0)
+		noFaults++;  //penalty of exceding the room's capacity
+
+	return noFaults;
 }
 
 
