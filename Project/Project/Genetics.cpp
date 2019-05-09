@@ -103,8 +103,9 @@ void Genetics::evaluateSolution(Node* solution)
 	std::vector<Room> rooms = this->data->getRooms();
 
 	std::map<std::pair<int, int>, int> examSlot; //key : periodIndex, roomIndex, value: roomOcSpace
-	std::map<int, std::set<int>> periodDurations; //key periodIndex  value: set with durations of the exams -> used for Mixed Durations penalty
-
+	std::map<int, std::pair<std::set<int>, std::vector<int>>> periodInfo;
+	//key : periodIndex
+	//value : pair : set -> key = exam duration ; vector : exam index
 
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
@@ -114,16 +115,20 @@ void Genetics::evaluateSolution(Node* solution)
 
 		periodIndex = schedule.at(i).first;
 		Period period = periods.at(periodIndex);
-		auto itp = periodDurations.find(periodIndex);
-		if (itp != periodDurations.end()) {
-			itp->second.insert(exam.getDuration());
+
+		auto itp = periodInfo.find(periodIndex);
+		if (itp != periodInfo.end()) {
+			itp->second.first.insert(exam.getDuration());
+			itp->second.second.push_back(i);
 		}
 		else {
 			std::set<int> durations;
 			durations.insert(exam.getDuration());
-			periodDurations.insert(std::pair<int, std::set<int>>(periodIndex, durations));
+			std::vector<int> pExams;
+			pExams.push_back(i);
+			periodInfo.insert(std::pair<int, std::pair<std::set<int>, std::vector<int>>>(periodIndex, std::pair<std::set<int>, std::vector<int>>(durations, pExams)));
 		}
-
+		
 		roomIndex = schedule.at(i).second;
 		Room room = rooms.at(roomIndex);
 	
@@ -146,9 +151,22 @@ void Genetics::evaluateSolution(Node* solution)
 
 	}
 
-	for (auto it = periodDurations.begin(); it != periodDurations.end(); it++){
-		penalty += (it->second.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
+	for (auto it = periodInfo.begin(); it != periodInfo.end(); it++){
+		penalty += (it->second.first.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
+		std::vector<int> periodExams = it->second.second;
+
+		for (int i = 0; i < periodExams.size() ; i++) {
+			Exam e1 = exams.at(periodExams.at(i));
+			for (int j = i + 1; j < periodExams.size(); j++) {
+				Exam e2 = exams.at(periodExams.at(j));
+				if (e1.getOverlappingStudents(&e2).size() != 0) {
+					noFaults++;
+				} 
+			}
+		}
 	}
+
+
 
 	solution->incNoFaults(noFaults);
 	solution->incPenalty(penalty);

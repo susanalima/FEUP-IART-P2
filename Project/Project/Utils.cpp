@@ -27,6 +27,16 @@ std::vector<int> Exam::getStudents() const
 	return this->students;
 }
 
+std::vector<int> Exam::getOverlappingStudents(Exam* exam)
+{
+	std::vector<int> examStudents = exam->getStudents();
+	std::vector<int> overlappingStudents;
+
+	auto it = std::set_intersection(examStudents.begin(), examStudents.end(), this->students.begin(), this->students.end(), back_inserter(overlappingStudents));
+
+	return overlappingStudents;
+}
+
 Period::Period(Date date, Time time, int duration, int penalty)
 {
 	this->date = date;

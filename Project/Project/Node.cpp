@@ -72,6 +72,7 @@ int Node::getNoFaults() const
 	return this->noFaults;
 }
 
+
 void Node::print()
 {
 	for (size_t i = 0; i < this->answers.size(); i++)

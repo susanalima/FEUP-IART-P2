@@ -46,6 +46,9 @@ public:
 	int getStudentsCnt() const;
 	std::vector<int> getStudents() const;
 
+	std::vector<int> getOverlappingStudents(Exam* exam);
+
+
 };
 
 class Period {
