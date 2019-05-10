@@ -29,7 +29,7 @@ private:
 	Node reproduce(Node* elem1, Node* elem2);
 	void insertPopulationBestElements(std::set<Node>* prevPopulation, std::set<Node>* newPopulation);
 	void evaluateSolution(Node* solution);
-	int applyPeriodHardConstraints(int index, std::vector<Period>* periods, std::vector<std::pair<int, int>>* schedule, Period* period, int periodIndex);
+	int applyPeriodHardConstraints(int index, std::vector<Period>* periods, std::vector<Exam>* exams, std::vector<std::pair<int, int>>* schedule, Period* period, Exam* exam, int periodIndex);
 	int applyGeneralHardConstraints(int index, std::map<std::pair<int, int>,int>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room);
 
 };
