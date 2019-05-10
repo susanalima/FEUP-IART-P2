@@ -6,7 +6,7 @@
 #include <set>
 #include <iterator>     
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 20, 3)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 40, 1000, 40, 10)
 {
 }
 
@@ -150,11 +150,12 @@ void Genetics::evaluateSolution(Node* solution)
 
 		if (pos >= flNrExams && periodIndex >= flNrPeriods) 
 			penalty += flPenalty;
-
 	}
 
+	
+
 	std::map<std::string, std::vector<int>> periodDays = this->data->getPeriodDays();
-	int periodPenalty = 0 , currentPeriodIndex;
+	int periodPenalty = 0 , currentPeriodIndex, overlappingNo;
 
 	//percorre todos os periodos e ve para cada 1
 	//*a cena das mixed durations
@@ -165,6 +166,7 @@ void Genetics::evaluateSolution(Node* solution)
 	for (auto it = periodInfo.begin(); it != periodInfo.end(); it++){
 
 		currentPeriodIndex = it->first;
+		
 		//Mixed Durations constraint
 		penalty += (it->second.first.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
 		
@@ -195,8 +197,8 @@ void Genetics::evaluateSolution(Node* solution)
 
 			sameDayExams = iter->second.second;
 
-			int overlappingNo;
-			for (int k = 0; i < periodExams.size(); k++) {
+
+			for (int k = 0; k < periodExams.size(); k++) {
 				Exam e1 = exams.at(periodExams.at(k));
 				for (int j = 0; j < sameDayExams.size(); j++) {
 					Exam e2 = exams.at(sameDayExams.at(j));
@@ -206,16 +208,36 @@ void Genetics::evaluateSolution(Node* solution)
 			}
 		}
 
-		//ve as colisoes de todos os exames de um periodo
+		
 		for (int i = 0; i < periodExams.size() ; i++) {
 			Exam e1 = exams.at(periodExams.at(i));
+
+			//ve as colisoes de todos os exames de um periodo
 			for (int j = i + 1; j < periodExams.size(); j++) {
 				Exam e2 = exams.at(periodExams.at(j));
 				if (e1.getOverlappingStudents(&e2).size() != 0) {
 					noFaults++;
 				} 
 			}
+			
+			//Period Spread constraint
+			for (int j = currentPeriodIndex + 1; j < periods.size(); j++) {
+
+				auto iter = periodInfo.find(j);
+				if (iter == periodInfo.end())
+					continue;
+				for (int k = 0; k < iter->second.second.size(); k++) {
+					Exam e2 = exams.at(iter->second.second.at(k));
+					overlappingNo = e1.getOverlappingStudents(&e2).size();
+					penalty += overlappingNo;
+				}
+				if (j == this->data->getInstWeights().getPeriodSpreed())
+					break;
+			}
+			
 		}
+
+		
 	}
 
 	solution->incNoFaults(noFaults);
@@ -304,6 +326,7 @@ Node Genetics::solve(std::set<Node> population)
 			mutate(&child);
 
 			evaluateSolution(&child);
+
 			penalty = child.getPenalty();
 			noFaults = child.getNoFaults();
 			if (bestPenalty == -1 || (penalty <= bestPenalty && noFaults <= bestNoFaults) || noFaults < bestNoFaults) {
