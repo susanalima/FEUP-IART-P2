@@ -6,7 +6,7 @@
 #include <set>
 #include <iterator>     
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 40, 1000, 40, 10)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 200, 30, 15)
 {
 }
 
@@ -108,6 +108,11 @@ void Genetics::evaluateSolution(Node* solution)
 	std::map<int, std::pair<std::set<int>, std::vector<int>>> periodInfo;
 	std::map<std::string, std::vector<int>> examDays;
 
+	InstitutionalWeightings instWeights = this->data->getInstWeights();
+	int flNrExams = instWeights.getFrontLoad().getNrExams();
+	int flNrPeriods = instWeights.getFrontLoad().getNrExams();
+	int flPenalty = instWeights.getFrontLoad().getPenalty();
+
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
 
 	for (int i = 0; i < schedule.size(); i++) {
@@ -134,7 +139,7 @@ void Genetics::evaluateSolution(Node* solution)
 		Room room = rooms.at(roomIndex);
 	
 		noFaults += applyGeneralHardConstraints(i, &examSlot, &schedule, &exam, &period, &room);
-		noFaults += applyPeriodHardConstraints(i, &periods, &schedule, &period, periodIndex);
+		noFaults += applyPeriodHardConstraints(i, &periods, &exams, &schedule, &period, &exam, periodIndex);
 
 		penalty += room.getPenalty(); //penalty of using the room
 		penalty += period.getPenalty(); //penalty of using the period
@@ -143,16 +148,9 @@ void Genetics::evaluateSolution(Node* solution)
 		auto it = find(examsSorted.begin(), examsSorted.end(), exam);
 		int pos = distance(examsSorted.begin(), it);
 		
-		InstitutionalWeightings instWeights = this->data->getInstWeights();
-		int flNrExams = instWeights.getFrontLoad().getNrExams();
-		int flNrPeriods = instWeights.getFrontLoad().getNrExams();
-		int flPenalty = instWeights.getFrontLoad().getPenalty();
-
 		if (pos >= flNrExams && periodIndex >= flNrPeriods) 
 			penalty += flPenalty;
 	}
-
-	
 
 	std::map<std::string, std::vector<int>> periodDays = this->data->getPeriodDays();
 	int periodPenalty = 0 , currentPeriodIndex, overlappingNo;
@@ -168,7 +166,7 @@ void Genetics::evaluateSolution(Node* solution)
 		currentPeriodIndex = it->first;
 		
 		//Mixed Durations constraint
-		penalty += (it->second.first.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
+		penalty += (it->second.first.size() - 1) * instWeights.getNonMixedDurations();
 		
 		std::vector<int> periodExams = it->second.second; //todos os exames do periodo de index it->first
 
@@ -183,10 +181,10 @@ void Genetics::evaluateSolution(Node* solution)
 			sameDayPeriodIndex = sameDayPeriods.at(i);
 
 			if (sameDayPeriodIndex > currentPeriodIndex + 1) {  //sameday
-				periodPenalty = this->data->getInstWeights().getTwoInDay();
+				periodPenalty = instWeights.getTwoInDay();
 			}
 			else if (sameDayPeriodIndex == currentPeriodIndex + 1) {  //inrow
-				periodPenalty = this->data->getInstWeights().getTwoInRow();
+				periodPenalty = instWeights.getTwoInRow();
 			}
 			else
 				continue;
@@ -196,7 +194,6 @@ void Genetics::evaluateSolution(Node* solution)
 				continue;
 
 			sameDayExams = iter->second.second;
-
 
 			for (int k = 0; k < periodExams.size(); k++) {
 				Exam e1 = exams.at(periodExams.at(k));
@@ -208,7 +205,6 @@ void Genetics::evaluateSolution(Node* solution)
 			}
 		}
 
-		
 		for (int i = 0; i < periodExams.size() ; i++) {
 			Exam e1 = exams.at(periodExams.at(i));
 
@@ -231,31 +227,29 @@ void Genetics::evaluateSolution(Node* solution)
 					overlappingNo = e1.getOverlappingStudents(&e2).size();
 					penalty += overlappingNo;
 				}
-				if (j == this->data->getInstWeights().getPeriodSpreed())
+				if (j >= instWeights.getPeriodSpreed())
 					break;
 			}
-			
-		}
-
-		
+		}	
 	}
 
 	solution->incNoFaults(noFaults);
 	solution->incPenalty(penalty);
 }
 
-int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *periods, std::vector<std::pair<int, int>>* schedule, Period* period,  int periodIndex)
+int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *periods, std::vector<Exam>* exams, std::vector<std::pair<int, int>>* schedule, Period* period, Exam* exam, int periodIndex)
 {
 	std::string periodConstraint;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints = this->data->getPeriodConstraints();
 	auto  ret = periodConstraints.equal_range(index);
-	int exam2, noFaults = 0;
+	int exam2Index, noFaults = 0, period2Index;
 	for (auto it = ret.first; it != ret.second; ++it) {
 		periodConstraint = it->second.second;
-		exam2 = it->second.first;
-	
+		exam2Index = it->second.first;
+		period2Index = schedule->at(exam2Index).first;
+
 		if (periodConstraint.compare("AFTER") == 0) {
-			Period period2 = periods->at(schedule->at(exam2).first);
+			Period period2 = periods->at(period2Index);
 			if (period->getDate() == period2.getDate()) {
 				if (period->getTime() <= period2.getTime())
 					noFaults++;
@@ -265,12 +259,15 @@ int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *period
 			}
 		}
 		else if (periodConstraint.compare("EXCLUSION") == 0) {
-			if (periodIndex == schedule->at(exam2).first)
+			if (periodIndex == period2Index)
 				noFaults++;
 		}
 		else if (periodConstraint.compare("EXAM_COINCIDENCE") == 0) {
-			if (periodIndex != schedule->at(exam2).first) //TODO CENA DAS SOBREPOSIÇOES DE ALUNOS
-				noFaults++;
+			if (periodIndex != period2Index) {
+				Exam exam2 = exams->at(exam2Index);
+				if(exam->getOverlappingStudents(&exam2).size() == 0)
+					noFaults++;
+			}
 		}
 	}
 
@@ -335,6 +332,7 @@ Node Genetics::solve(std::set<Node> population)
 				bestNoFaults = noFaults;
 			}
 
+			//todo este or e estupido, arranjar outra condiçao de paragem
 			if (noFaults == 0 && (penalty == 0
 				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
 					&& penalty == maxRoomPeriodPenalty))) {
@@ -342,7 +340,7 @@ Node Genetics::solve(std::set<Node> population)
 				return this->best;
 			}
 		
-			auto value = newPopulation.insert(child);
+			newPopulation.insert(child);
 		}
 		population = newPopulation;
 	}
