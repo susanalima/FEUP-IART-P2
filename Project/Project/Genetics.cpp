@@ -103,10 +103,9 @@ void Genetics::evaluateSolution(Node* solution)
 	std::vector<Room> rooms = this->data->getRooms();
 
 	std::map<std::pair<int, int>, int> examSlot; //key : periodIndex, roomIndex, value: roomOcSpace
-	std::map<int, std::pair<std::set<int>, std::vector<int>>> periodInfo;
 	//key : periodIndex
 	//value : pair : set -> key = exam duration ; vector : exam index
-
+	std::map<int, std::pair<std::set<int>, std::vector<int>>> periodInfo;
 	std::map<std::string, std::vector<int>> examDays;
 
 	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
@@ -140,6 +139,7 @@ void Genetics::evaluateSolution(Node* solution)
 		penalty += room.getPenalty(); //penalty of using the room
 		penalty += period.getPenalty(); //penalty of using the period
 
+		//Larger Exams towards the beginning of the examination session constraint
 		auto it = find(examsSorted.begin(), examsSorted.end(), exam);
 		int pos = distance(examsSorted.begin(), it);
 		
@@ -154,26 +154,59 @@ void Genetics::evaluateSolution(Node* solution)
 	}
 
 	std::map<std::string, std::vector<int>> periodDays = this->data->getPeriodDays();
+	int periodPenalty = 0 , currentPeriodIndex;
+
+	//percorre todos os periodos e ve para cada 1
+	//*a cena das mixed durations
+	//*os periodos no mesmo dia
+	//*para cada exame do periodo ve as colisoes com os outros exames do mesmo periodo
+	//*para cada exame do periodo ve as colisoes com os exames dos outros periodos do mesmo dia (os periodos depois dele)
 
 	for (auto it = periodInfo.begin(); it != periodInfo.end(); it++){
+
+		currentPeriodIndex = it->first;
+		//Mixed Durations constraint
 		penalty += (it->second.first.size() - 1) * this->data->getInstWeights().getNonMixedDurations();
-		std::vector<int> periodExams = it->second.second;
+		
+		std::vector<int> periodExams = it->second.second; //todos os exames do periodo de index it->first
 
-		std::string sDate = periods.at(it->first).getDate().getDate();
-		std::vector<int> sameDayPeriods = periodDays[sDate];
+		std::string sDate = periods.at(currentPeriodIndex).getDate().getDate(); //dia do periodo 
+		std::vector<int> sameDayPeriods = periodDays[sDate]; //todos os periodos daquele dia
 
-		/*for (int i = 0; i < sameDayPeriods.size(); i++)
-			std::cout << sameDayPeriods.at(i) << std::endl;
+		int sameDayPeriodIndex;  //index do periodo daquele dia
+		std::vector<int> sameDayExams;
 
-		std::cout << std::endl << std::endl;*/
+		for (int i = 0; i < sameDayPeriods.size(); i++) {
 
-		int nextPeriod = it->first + 1;
+			sameDayPeriodIndex = sameDayPeriods.at(i);
 
-		if (std::find(sameDayPeriods.begin(), sameDayPeriods.end(), nextPeriod) != sameDayPeriods.end()) {
-			/* v contains x */
-			//ver os overlaps
+			if (sameDayPeriodIndex > currentPeriodIndex + 1) {  //sameday
+				periodPenalty = this->data->getInstWeights().getTwoInDay();
+			}
+			else if (sameDayPeriodIndex == currentPeriodIndex + 1) {  //inrow
+				periodPenalty = this->data->getInstWeights().getTwoInRow();
+			}
+			else
+				continue;
+
+			auto iter = periodInfo.find(sameDayPeriodIndex);
+			if(iter == periodInfo.end())
+				continue;
+
+			sameDayExams = iter->second.second;
+
+			int overlappingNo;
+			for (int k = 0; i < periodExams.size(); k++) {
+				Exam e1 = exams.at(periodExams.at(k));
+				for (int j = 0; j < sameDayExams.size(); j++) {
+					Exam e2 = exams.at(sameDayExams.at(j));
+					overlappingNo = e1.getOverlappingStudents(&e2).size();
+					penalty += overlappingNo * periodPenalty;
+				}
+			}
 		}
 
+		//ve as colisoes de todos os exames de um periodo
 		for (int i = 0; i < periodExams.size() ; i++) {
 			Exam e1 = exams.at(periodExams.at(i));
 			for (int j = i + 1; j < periodExams.size(); j++) {
@@ -182,14 +215,6 @@ void Genetics::evaluateSolution(Node* solution)
 					noFaults++;
 				} 
 			}
-
-			//ciclo do overlaps -> ir buscar todos os exames do periodo a seguir (nextPeriod) e comparar com os deste periodo
-			/*for (int j = 0; j < periodExams.size(); j++) {
-				Exam e2 = exams.at(periodExams.at(j));
-				if (e1.getOverlappingStudents(&e2).size() != 0) {
-					noFaults++;
-				}
-			*/
 		}
 	}
 
