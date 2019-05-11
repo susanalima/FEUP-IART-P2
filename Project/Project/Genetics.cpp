@@ -6,7 +6,7 @@
 #include <set>
 #include <iterator>     
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 200, 30, 15)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15)
 {
 }
 
@@ -194,24 +194,25 @@ void Genetics::evaluateSolution(Node* solution)
 				continue;
 
 			sameDayExams = iter->second.second;
-
+			int e1, e2;
 			for (int k = 0; k < periodExams.size(); k++) {
-				Exam e1 = exams.at(periodExams.at(k));
+				e1 = periodExams.at(k);
 				for (int j = 0; j < sameDayExams.size(); j++) {
-					Exam e2 = exams.at(sameDayExams.at(j));
-					overlappingNo = e1.getOverlappingStudents(&e2).size();
+					e2 = sameDayExams.at(j);
+					overlappingNo = this->data->getExamsOverlaps(e1,e2);
 					penalty += overlappingNo * periodPenalty;
 				}
 			}
 		}
 
+		int e1, e2;
 		for (int i = 0; i < periodExams.size() ; i++) {
-			Exam e1 = exams.at(periodExams.at(i));
+			e1 = periodExams.at(i);
 
 			//ve as colisoes de todos os exames de um periodo
 			for (int j = i + 1; j < periodExams.size(); j++) {
-				Exam e2 = exams.at(periodExams.at(j));
-				if (e1.getOverlappingStudents(&e2).size() != 0) {
+				e2 = periodExams.at(j);
+				if (this->data->getExamsOverlaps(e1,e2) != 0) {
 					noFaults++;
 				} 
 			}
@@ -223,8 +224,8 @@ void Genetics::evaluateSolution(Node* solution)
 				if (iter == periodInfo.end())
 					continue;
 				for (int k = 0; k < iter->second.second.size(); k++) {
-					Exam e2 = exams.at(iter->second.second.at(k));
-					overlappingNo = e1.getOverlappingStudents(&e2).size();
+					e2 = iter->second.second.at(k);
+					overlappingNo = this->data->getExamsOverlaps(e1,e2);
 					penalty += overlappingNo;
 				}
 				if (j >= instWeights.getPeriodSpreed())
@@ -264,8 +265,8 @@ int Genetics::applyPeriodHardConstraints(int index,  std::vector<Period> *period
 		}
 		else if (periodConstraint.compare("EXAM_COINCIDENCE") == 0) {
 			if (periodIndex != period2Index) {
-				Exam exam2 = exams->at(exam2Index);
-				if(exam->getOverlappingStudents(&exam2).size() == 0)
+				//Exam exam2 = exams->at(exam2Index);
+				if(this->data->getExamsOverlaps(index, exam2Index) == 0)
 					noFaults++;
 			}
 		}
@@ -333,9 +334,9 @@ Node Genetics::solve(std::set<Node> population)
 			}
 
 			//todo este or e estupido, arranjar outra condiçao de paragem
-			if (noFaults == 0 && (penalty == 0
+			if (noFaults == 0 && penalty == 0) /*
 				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
-					&& penalty == maxRoomPeriodPenalty))) {
+					&& penalty == maxRoomPeriodPenalty)))*/ {
 				
 				return this->best;
 			}

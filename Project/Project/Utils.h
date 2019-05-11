@@ -59,26 +59,28 @@ class Period {
 	Time time;
 	int duration;
 	int penalty;
+	int id;
 
 public:
-	Period(Date date, Time time, int duration, int penalty);
+	Period(Date date, Time time, int duration, int penalty, int id);
 	Date getDate() const;
 	Time getTime() const;
 	int getDuration() const;
 	int getPenalty() const;
-
+	int getId() const;
 };
 
 class Room {
 
+	int id;
 	int capacity;
 	int penalty;
 
 public:
-	Room(int capacity, int penalty);
+	Room(int capacity, int penalty, int id);
 	int getCapacity() const;
 	int getPenalty() const;
-
+	int getId() const;
 };
 
 

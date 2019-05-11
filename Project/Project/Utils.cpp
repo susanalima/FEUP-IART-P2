@@ -37,12 +37,13 @@ std::vector<int> Exam::getOverlappingStudents(Exam* exam)
 	return overlappingStudents;
 }
 
-Period::Period(Date date, Time time, int duration, int penalty)
+Period::Period(Date date, Time time, int duration, int penalty, int id)
 {
 	this->date = date;
 	this->time = time;
 	this->duration = duration;
 	this->penalty = penalty;
+	this->id = id;
 }
 
 Date Period::getDate() const
@@ -65,10 +66,16 @@ int Period::getPenalty() const
 	return this->penalty;
 }
 
-Room::Room(int capacity, int penalty)
+int Period::getId() const
+{
+	return this->id;
+}
+
+Room::Room(int capacity, int penalty, int id)
 {
 	this->capacity = capacity;
 	this->penalty = penalty;
+	this->id = id;
 }
 
 int Room::getCapacity() const
@@ -79,6 +86,11 @@ int Room::getCapacity() const
 int Room::getPenalty() const
 {
 	return this->penalty;
+}
+
+int Room::getId() const
+{
+	return this->id;
 }
 
 Time::Time()

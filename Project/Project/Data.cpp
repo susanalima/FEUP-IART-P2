@@ -19,6 +19,7 @@ Data::Data()
 	std::sort(this->rooms.begin(), this->rooms.end());
 
 	buildPeriodDays();
+	buildIncompatibilitiesTable();
 }
 
 void Data::buildPeriodDays() {
@@ -32,6 +33,19 @@ void Data::buildPeriodDays() {
 			std::vector<int> periods;
 			periods.push_back(i);
 			periodDays.insert(std::pair<std::string, std::vector<int>>(sDate, periods));
+		}
+	}
+}
+
+void Data::buildIncompatibilitiesTable()
+{
+	int nrOverlaps;
+	for (int i = 0; i < this->exams.size(); i++) {
+		Exam exam1 = this->exams.at(i);
+		for (int j = i + 1; j < this->exams.size(); j++) {
+			Exam exam2 = this->exams.at(j);
+			nrOverlaps = exam1.getOverlappingStudents(&exam2).size();
+			this->incompatibilitiesTable.insert(std::pair<std::pair<int, int>, int>(std::pair<int, int>(i, j), nrOverlaps));
 		}
 	}
 }
@@ -98,6 +112,7 @@ void Data::readPeriods()
 			this->periodsCnt = std::stoi(line);
 		}
 
+		int id = 0;
 		while (getline(input, line))
 		{
 			std::stringstream lineInput(line);
@@ -120,9 +135,10 @@ void Data::readPeriods()
 			}
 
 			if (cnt == 4) {
-				Period period = Period(date, time, duration, penalty);
+				Period period = Period(date, time, duration, penalty, id);
 				this->maxPeriodPenalty += penalty;
 				this->periods.push_back(period);
+				id++;
 			}
 		}
 
@@ -145,6 +161,7 @@ void Data::readRooms()
 			this->roomsCnt = std::stoi(line);
 		}
 
+		int id = 0;
 		while (getline(input, line))
 		{
 			std::stringstream lineInput(line);
@@ -161,9 +178,10 @@ void Data::readRooms()
 			}
 
 			if (cnt == 2) {
-				Room room = Room(capacity, penalty);
+				Room room = Room(capacity, penalty, id);
 				this->maxRoomPenalty += penalty;
 				this->rooms.push_back(room);
+				id++;
 			}
 		}
 
@@ -402,5 +420,15 @@ InstitutionalWeightings Data::getInstWeights() const
 std::map<std::string, std::vector<int>> Data::getPeriodDays() const
 {
 	return this->periodDays;
+}
+
+int Data::getExamsOverlaps(int examIndex1, int examIndex2) const
+{
+	auto it = this->incompatibilitiesTable.find(std::pair<int, int>(examIndex1, examIndex2));
+	if (it != this->incompatibilitiesTable.end()) {
+		return it->second;
+	}
+	else
+		return getExamsOverlaps(examIndex2, examIndex1);
 }
 

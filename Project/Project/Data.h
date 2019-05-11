@@ -40,6 +40,8 @@ class Data {
 
 	InstitutionalWeightings instWeights;
 
+	std::map<std::pair<int, int>, int> incompatibilitiesTable;
+
 public:
 
 	Data();
@@ -62,6 +64,8 @@ public:
 	InstitutionalWeightings getInstWeights() const;
 	std::map<std::string, std::vector<int>> getPeriodDays() const;
 
+	int getExamsOverlaps(int examIndex1, int examIndex2) const;
+
 private:
 
 	void read();
@@ -72,6 +76,6 @@ private:
 	void readPeriodContraints();
 	void readInstWeights();
 	void buildPeriodDays();
-
+	void buildIncompatibilitiesTable();
 
 };
