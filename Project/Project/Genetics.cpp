@@ -176,6 +176,7 @@ void Genetics::evaluateSolution(Node* solution)
 		int sameDayPeriodIndex;  //index do periodo daquele dia
 		std::vector<int> sameDayExams;
 
+		int e1, e2;
 		for (int i = 0; i < sameDayPeriods.size(); i++) {
 
 			sameDayPeriodIndex = sameDayPeriods.at(i);
@@ -194,7 +195,7 @@ void Genetics::evaluateSolution(Node* solution)
 				continue;
 
 			sameDayExams = iter->second.second;
-			int e1, e2;
+
 			for (int k = 0; k < periodExams.size(); k++) {
 				e1 = periodExams.at(k);
 				for (int j = 0; j < sameDayExams.size(); j++) {
@@ -205,7 +206,7 @@ void Genetics::evaluateSolution(Node* solution)
 			}
 		}
 
-		int e1, e2;
+
 		for (int i = 0; i < periodExams.size() ; i++) {
 			e1 = periodExams.at(i);
 

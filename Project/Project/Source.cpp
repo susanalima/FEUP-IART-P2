@@ -23,8 +23,10 @@ int main()
 	set<Node> population;
 	population.insert(ini);
 	Node gnbest = gn.solve(population);
-	gnbest.print();
+	/*gnbest.print();
 	std::cout << gnbest.getNoFaults() << std::endl;
-	std::cout << gnbest.getPenalty() << std::endl;
+	std::cout << gnbest.getPenalty() << std::endl;*/
+
+	data.printNodeInfo(&gnbest);
 
 }

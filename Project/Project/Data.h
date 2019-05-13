@@ -66,6 +66,9 @@ public:
 
 	int getExamsOverlaps(int examIndex1, int examIndex2) const;
 
+	void printNodeInfo(Node* node);
+
+
 private:
 
 	void read();

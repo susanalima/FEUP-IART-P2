@@ -432,3 +432,18 @@ int Data::getExamsOverlaps(int examIndex1, int examIndex2) const
 		return getExamsOverlaps(examIndex2, examIndex1);
 }
 
+
+//prints de period and room ids instead of the indexes (ids are in the order of the file)
+void Data::printNodeInfo(Node* node)
+{
+	std::vector<std::pair<int, int>> answers = node->getAnswers();
+	int periodIndex, roomIndex;
+	for (int i = 0; i < answers.size(); i++) {
+		periodIndex = answers.at(i).first;
+		roomIndex = answers.at(i).second;
+		std::cout << this->periods.at(periodIndex).getId() << ", " << this->rooms.at(roomIndex).getId() << std::endl;
+	}
+	std::cout << "nr of faults : " << node->getNoFaults() << std::endl;
+	std::cout << "penalty : " << node->getPenalty() << std::endl;
+}
+
