@@ -26,6 +26,9 @@ public:
 	unsigned int getAnswersSize() const;
 	bool isRoomFree(std::pair<int, int> slot);
 
+	void setPenalty(int penalty);
+	void setNoFaults(int noFaults);
+
 	void incPenalty(int inc);
 	void incNoFaults(int inc);
 

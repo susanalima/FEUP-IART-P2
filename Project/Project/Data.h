@@ -68,6 +68,7 @@ public:
 
 	void printNodeInfo(Node* node);
 
+	void evaluateSolution(Node* solution);
 
 private:
 
@@ -80,5 +81,9 @@ private:
 	void readInstWeights();
 	void buildPeriodDays();
 	void buildIncompatibilitiesTable();
+
+	int applyPeriodHardConstraints(int index, std::vector<std::pair<int, int>>* schedule, Period* period, Exam* exam, int periodIndex);
+	int applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, int>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room);
+
 
 };

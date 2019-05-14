@@ -52,6 +52,16 @@ bool Node::isRoomFree(std::pair<int, int> slot)
 	return true;
 }
 
+void Node::setPenalty(int penalty)
+{
+	this->penalty = penalty;
+}
+
+void Node::setNoFaults(int noFaults)
+{
+	this->noFaults = noFaults;
+}
+
 void Node::incPenalty(int inc)
 {
 	this->penalty += inc;

@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
+#include <set>
+#include <iterator>   
 
 Data::Data()
 {
@@ -447,3 +450,210 @@ void Data::printNodeInfo(Node* node)
 	std::cout << "penalty : " << node->getPenalty() << std::endl;
 }
 
+
+// fazer refactoring nesta porra
+void Data::evaluateSolution(Node* solution)
+{
+	int penalty = 0, noFaults = 0, roomIndex, periodIndex;
+	std::string roomConstraint, periodConstraint;
+
+	std::vector<std::pair<int, int>> schedule = solution->getAnswers();
+	std::vector<Exam>  examsSorted = this->exams;
+
+	std::map<std::pair<int, int>, int> examSlot; //key : periodIndex, roomIndex, value: roomOcSpace
+	//key : periodIndex
+	//value : pair : set -> key = exam duration ; vector : exam index
+	std::map<int, std::pair<std::set<int>, std::vector<int>>> periodInfo;
+	std::map<std::string, std::vector<int>> examDays;
+
+	int flNrExams = this->instWeights.getFrontLoad().getNrExams();
+	int flNrPeriods = this->instWeights.getFrontLoad().getNrExams();
+	int flPenalty = this->instWeights.getFrontLoad().getPenalty();
+
+	std::sort(examsSorted.begin(), examsSorted.end()); //sorted by student count
+
+	for (int i = 0; i < schedule.size(); i++) {
+
+		Exam exam = this->exams.at(i);
+
+		periodIndex = schedule.at(i).first;
+		Period period = this->periods.at(periodIndex);
+
+		auto itp = periodInfo.find(periodIndex);
+		if (itp != periodInfo.end()) {
+			itp->second.first.insert(exam.getDuration());
+			itp->second.second.push_back(i);
+		}
+		else {
+			std::set<int> durations;
+			durations.insert(exam.getDuration());
+			std::vector<int> pExams;
+			pExams.push_back(i);
+			periodInfo.insert(std::pair<int, std::pair<std::set<int>, std::vector<int>>>(periodIndex, std::pair<std::set<int>, std::vector<int>>(durations, pExams)));
+		}
+
+		roomIndex = schedule.at(i).second;
+		Room room = this->rooms.at(roomIndex);
+
+		noFaults += applyGeneralHardConstraints(i, &examSlot, &schedule, &exam, &period, &room);
+		noFaults += applyPeriodHardConstraints(i, &schedule, &period, &exam, periodIndex);
+
+		penalty += room.getPenalty(); //penalty of using the room
+		penalty += period.getPenalty(); //penalty of using the period
+
+		//Larger Exams towards the beginning of the examination session constraint
+		auto it = find(examsSorted.begin(), examsSorted.end(), exam);
+		int pos = distance(examsSorted.begin(), it);
+
+		if (pos >= flNrExams && periodIndex >= flNrPeriods)
+			penalty += flPenalty;
+	}
+
+	int periodPenalty = 0, currentPeriodIndex, overlappingNo;
+
+	//percorre todos os periodos e ve para cada 1
+	//*a cena das mixed durations
+	//*os periodos no mesmo dia
+	//*para cada exame do periodo ve as colisoes com os outros exames do mesmo periodo
+	//*para cada exame do periodo ve as colisoes com os exames dos outros periodos do mesmo dia (os periodos depois dele)
+
+	for (auto it = periodInfo.begin(); it != periodInfo.end(); it++) {
+
+		currentPeriodIndex = it->first;
+
+		//Mixed Durations constraint
+		penalty += (it->second.first.size() - 1) * this->instWeights.getNonMixedDurations();
+
+		std::vector<int> periodExams = it->second.second; //todos os exames do periodo de index it->first
+
+		std::string sDate = this->periods.at(currentPeriodIndex).getDate().getDate(); //dia do periodo 
+		std::vector<int> sameDayPeriods = this->periodDays[sDate]; //todos os periodos daquele dia
+
+		int sameDayPeriodIndex;  //index do periodo daquele dia
+		std::vector<int> sameDayExams;
+
+		int e1, e2;
+		for (int i = 0; i < sameDayPeriods.size(); i++) {
+
+			sameDayPeriodIndex = sameDayPeriods.at(i);
+
+			if (sameDayPeriodIndex > currentPeriodIndex + 1) {  //sameday
+				periodPenalty = instWeights.getTwoInDay();
+			}
+			else if (sameDayPeriodIndex == currentPeriodIndex + 1) {  //inrow
+				periodPenalty = instWeights.getTwoInRow();
+			}
+			else
+				continue;
+
+			auto iter = periodInfo.find(sameDayPeriodIndex);
+			if (iter == periodInfo.end())
+				continue;
+
+			sameDayExams = iter->second.second;
+
+			for (int k = 0; k < periodExams.size(); k++) {
+				e1 = periodExams.at(k);
+				for (int j = 0; j < sameDayExams.size(); j++) {
+					e2 = sameDayExams.at(j);
+					overlappingNo = getExamsOverlaps(e1, e2);
+					penalty += overlappingNo * periodPenalty;
+				}
+			}
+		}
+
+
+		for (int i = 0; i < periodExams.size(); i++) {
+			e1 = periodExams.at(i);
+
+			//ve as colisoes de todos os exames de um periodo
+			for (int j = i + 1; j < periodExams.size(); j++) {
+				e2 = periodExams.at(j);
+				if (getExamsOverlaps(e1, e2) != 0) {
+					noFaults++;
+				}
+			}
+
+			//Period Spread constraint
+			for (int j = currentPeriodIndex + 1; j < periods.size(); j++) {
+
+				auto iter = periodInfo.find(j);
+				if (iter == periodInfo.end())
+					continue;
+				for (int k = 0; k < iter->second.second.size(); k++) {
+					e2 = iter->second.second.at(k);
+					overlappingNo = getExamsOverlaps(e1, e2);
+					penalty += overlappingNo;
+				}
+				if (j >= this->instWeights.getPeriodSpreed())
+					break;
+			}
+		}
+	}
+
+	solution->setNoFaults(noFaults);
+	solution->setPenalty(penalty);
+}
+
+int Data::applyPeriodHardConstraints(int index, std::vector<std::pair<int, int>> * schedule, Period * period, Exam * exam, int periodIndex)
+{
+	std::string periodConstraint;
+	std::multimap<int, std::pair<int, std::string>> periodConstraints = getPeriodConstraints();
+	auto  ret = periodConstraints.equal_range(index);
+	int exam2Index, noFaults = 0, period2Index;
+	for (auto it = ret.first; it != ret.second; ++it) {
+		periodConstraint = it->second.second;
+		exam2Index = it->second.first;
+		period2Index = schedule->at(exam2Index).first;
+
+		if (periodConstraint.compare("AFTER") == 0) {
+			Period period2 = this->periods.at(period2Index);
+			if (period->getDate() == period2.getDate()) {
+				if (period->getTime() <= period2.getTime())
+					noFaults++;
+			}
+			else if (period->getDate() < period2.getDate()) {
+				noFaults++;
+			}
+		}
+		else if (periodConstraint.compare("EXCLUSION") == 0) {
+			if (periodIndex == period2Index)
+				noFaults++;
+		}
+		else if (periodConstraint.compare("EXAM_COINCIDENCE") == 0) {
+			if (periodIndex != period2Index) {
+				//Exam exam2 = exams->at(exam2Index);
+				if (getExamsOverlaps(index, exam2Index) == 0)
+					noFaults++;
+			}
+		}
+	}
+
+	return noFaults;
+}
+
+
+int Data::applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, int> * examSlot, std::vector<std::pair<int, int>> * schedule, Exam * exam, Period * period, Room * room)
+{
+	int noFaults = 0;
+	std::string roomConstraint = getExamRoomConstraint(index);
+
+	auto it = examSlot->find(schedule->at(index));
+	if (it != examSlot->end()) {
+		it->second = it->second + exam->getStudentsCnt();
+
+		if (roomConstraint.compare("ROOM_EXCLUSIVE") == 0) {  //TODO USE MACRO
+			noFaults++;
+		}
+	}
+	else {
+		it = (examSlot->insert(std::pair<std::pair<int, int>, int>(schedule->at(index), exam->getStudentsCnt()))).first;
+	}
+
+	if (period->getDuration() < exam->getDuration())
+		noFaults++;  //penalty of exceding the period's duration
+	if (room->getCapacity() < it->second)
+		noFaults++;  //penalty of exceding the room's capacity
+
+	return noFaults;
+}
