@@ -41,4 +41,6 @@ public:
 bool operator==(const Node& lhs, const Node& rhs);
 bool operator!=(const Node& lhs, const Node& rhs);
 bool operator<(const Node& lhs, const Node& rhs);
+bool operator>(const Node& lhs, const Node& rhs);
+bool operator<=(const Node& lhs, const Node& rhs);
 

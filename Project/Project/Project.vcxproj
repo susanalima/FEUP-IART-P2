@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Data.cpp" />
+    <ClCompile Include="Genetics.cpp" />
     <ClCompile Include="HillClimbing.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -167,7 +168,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="exams.txt" />
+    <Text Include="institutionalWeightings.txt" />
+    <Text Include="periodConstraints.txt" />
     <Text Include="periods.txt" />
+    <Text Include="roomConstraints.txt" />
     <Text Include="rooms.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

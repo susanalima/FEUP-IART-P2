@@ -15,9 +15,12 @@ int main()
 
 	HillClimbing hc(&data, ini);
 	Node best = hc.solve();
-	best.print();
 
 	cout << endl << endl;
+
+	data.printNodeInfo(&best);
+
+	/*cout << endl << endl;
 
 	Genetics gn(&data, ini);
 	set<Node> population;
@@ -27,6 +30,6 @@ int main()
 	std::cout << gnbest.getNoFaults() << std::endl;
 	std::cout << gnbest.getPenalty() << std::endl;*/
 
-	data.printNodeInfo(&gnbest);
+	//data.printNodeInfo(&gnbest);
 
 }

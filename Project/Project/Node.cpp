@@ -122,4 +122,14 @@ bool operator<(const Node& lhs, const Node& rhs)
 		return lhs.getNoFaults() < rhs.getNoFaults();
 }
 
+bool operator>(const Node& lhs, const Node& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Node& lhs, const Node& rhs)
+{
+	return !(lhs > rhs);
+}
+
 
