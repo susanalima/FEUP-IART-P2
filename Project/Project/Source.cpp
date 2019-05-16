@@ -20,7 +20,7 @@ int main()
 
 	data.printNodeInfo(&best);
 
-	/*cout << endl << endl;
+	cout << endl << endl;
 
 	Genetics gn(&data, ini);
 	set<Node> population;
@@ -30,6 +30,6 @@ int main()
 	std::cout << gnbest.getNoFaults() << std::endl;
 	std::cout << gnbest.getPenalty() << std::endl;*/
 
-	//data.printNodeInfo(&gnbest);
+	data.printNodeInfo(&gnbest);
 
 }

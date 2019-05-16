@@ -12,11 +12,12 @@ class Genetics {
 	int maxNoGenerations;  // maximum number of generations
 	int mutationProbability;  // mutation probability (percentage 0-100)
 	int parentEliteNo;    //nr of elements received from the previous generation (the better eliteNo)
+	long maxTimeMilliseconds; //the maximum time in milliseconds that the algorithm is to run for
 
 public:
 
 	Genetics(Data* data, Node initial);
-	Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo);
+	Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo, long maxTimeMilliseconds);
 	
 	Node solve(std::set<Node> population);
 

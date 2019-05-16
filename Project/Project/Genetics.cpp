@@ -5,12 +5,13 @@
 #include <map>
 #include <set>
 #include <iterator>     
+#include <chrono>
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15, 60000)
 {
 }
 
-Genetics::Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo)
+Genetics::Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo, long maxTimeMilliseconds)
 {
 	this->data = data;
 	this->initial = initial;
@@ -19,6 +20,7 @@ Genetics::Genetics(Data* data, Node initial, int populationSize, int maxNoGenera
 	this->maxNoGenerations = maxNoGenerations;
 	this->mutationProbability = mutationProbability;
 	this->parentEliteNo = parentEliteNo;
+	this->maxTimeMilliseconds = maxTimeMilliseconds;
 }
 
 
@@ -99,6 +101,8 @@ Node Genetics::solve(std::set<Node> population)
 	int maxRoomPeriodPenalty = this->data->getMaxRoomPenalty() + this->data->getMaxPeriodPenalty();
 	Node elem1, elem2, child;
 
+	const auto begin = clock();
+
 	for (int generationsCount = 0; generationsCount < this->maxNoGenerations; generationsCount++) {
 
 		std::set<Node> newPopulation;
@@ -123,10 +127,10 @@ Node Genetics::solve(std::set<Node> population)
 				bestNoFaults = noFaults;
 			}
 
-			//todo este or e estupido, arranjar outra condiçao de paragem
-			if (noFaults == 0 && penalty == 0) /*
-				|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
-					&& penalty == maxRoomPeriodPenalty)))*/ {
+			/*|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
+					&& penalty == maxRoomPeriodPenalty)))*/
+			if ((noFaults == 0 && penalty == 0) 
+				|| (maxTimeMilliseconds > 0L && ((clock() - begin) / CLOCKS_PER_SEC *1000  >= maxTimeMilliseconds))) {
 				
 				return this->best;
 			}
