@@ -13,6 +13,8 @@ class Node {
 	int penalty;
 	int noFaults;
 
+	int value;
+
 public:
 
 	Node();
@@ -34,8 +36,10 @@ public:
 
 	int getPenalty() const;
 	int getNoFaults() const;
+	int getValue() const;
 
 	void print();
+	void updateValue();
 };
 
 bool operator==(const Node& lhs, const Node& rhs);

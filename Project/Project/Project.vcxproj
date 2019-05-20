@@ -155,6 +155,7 @@
     <ClCompile Include="Genetics.cpp" />
     <ClCompile Include="HillClimbing.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="SimulatedAnnealing.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>

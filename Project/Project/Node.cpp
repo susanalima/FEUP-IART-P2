@@ -55,21 +55,25 @@ bool Node::isRoomFree(std::pair<int, int> slot)
 void Node::setPenalty(int penalty)
 {
 	this->penalty = penalty;
+	this->updateValue();
 }
 
 void Node::setNoFaults(int noFaults)
 {
 	this->noFaults = noFaults;
+	this->updateValue();
 }
 
 void Node::incPenalty(int inc)
 {
 	this->penalty += inc;
+	this->updateValue();
 }
 
 void Node::incNoFaults(int inc)
 {
 	this->noFaults += inc;
+	this->updateValue();
 }
 
 int Node::getPenalty() const
@@ -82,6 +86,11 @@ int Node::getNoFaults() const
 	return this->noFaults;
 }
 
+int Node::getValue() const
+{
+	return this->value;
+}
+
 
 void Node::print()
 {
@@ -90,6 +99,11 @@ void Node::print()
 		std::pair<int, int> p = this->answers.at(i);
 		std::cout << p.first << ", " << p.second << std::endl;
 	}
+}
+
+void Node::updateValue()
+{
+	this->value = this->noFaults * 1000 + this->penalty;
 }
 
 bool operator==(const Node& lhs, const Node& rhs)
