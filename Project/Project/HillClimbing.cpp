@@ -5,7 +5,7 @@ Node HillClimbing::solve()
 	Node previous = this->best;
 	while (true) {
 		Node neighbor = findBestNeighbor(this->best);
-		if (neighbor <= this->best && neighbor != previous) {
+		if (neighbor < this->best && neighbor != previous) {
 			previous = this->best;
 			this->best = neighbor;
 		} 
@@ -77,7 +77,7 @@ Node HillClimbing::findBestNeighbor(Node current)
 	for (size_t i = 0; i < current.getAnswersSize(); i++)
 	{
 		Node tmp = findExamBestNeighbor(current, i);
-		if (node < tmp)
+		if (node > tmp)
 			node = tmp;
 	}
 	return node;

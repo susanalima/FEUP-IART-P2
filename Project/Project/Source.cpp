@@ -13,7 +13,8 @@ int main()
 
 	Data data = Data();
 	Node ini = data.generateInitialState();
-	ini.print();
+	data.evaluateSolution(&ini);
+	data.printNodeInfo(&ini);
 	
 	cout << endl << endl;
 	cout << "HillClimbing Info" << endl;
