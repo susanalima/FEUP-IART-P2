@@ -77,7 +77,7 @@ void DataRoom::writeRooms()
 	std::ofstream outfile("rooms.txt");
 	outfile << "Rooms:" << this->nrRooms << std::endl;
 	for (int i = 0; i < this->nrRooms; i++) {
-		outfile <<  this->rooms.at(i).first << "," << this->rooms.at(i).second << std::endl;
+		outfile <<  this->rooms.at(i).first << ", " << this->rooms.at(i).second << std::endl;
 	}
 	outfile.close();
 

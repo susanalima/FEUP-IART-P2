@@ -14,14 +14,6 @@
 DataExam::DataExam()
 {
 	this->readExamInfo();
-
-	std::cout << this->duration.first << std::endl;
-	std::cout << this->duration.second << std::endl;
-
-	std::cout << this->nrStudents.first << std::endl;
-	std::cout << this->nrStudents.second << std::endl;
-
-
 	this->buildExams();
 }
 
@@ -96,7 +88,9 @@ void DataExam::writeExams()
 		outfile << this->exams.at(i).duration << ", ";
 		students = this->exams.at(i).students;
 		for (unsigned int j = 0; j < students.size(); j++) {
-			outfile << students.at(j) << ", ";
+			outfile << students.at(j);
+			if (j < students.size() - 1)
+				outfile << ", ";
 		}
 		outfile << std::endl;
 	}
@@ -118,7 +112,7 @@ void DataExam::buildExams()
 		j = 0;
 		for (; j < eNrStudents; j++) {
 			int n = mt() % 100 + 1;
-			if (n <= 20)
+			if (n <= 15)
 				index = mt() % this->nrExams * this->nrStudents.second + 1;
 			else
 				index = j + lastStudent;
