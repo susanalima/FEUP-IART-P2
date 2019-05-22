@@ -13,8 +13,6 @@ Data::Data()
 	this->examsCnt = 0;
 	this->periodsCnt = 0;
 	this->roomsCnt = 0;
-	this->maxPeriodPenalty = 0;
-	this->maxRoomPenalty = 0;
 
 	this->read();
 
@@ -139,7 +137,6 @@ void Data::readPeriods()
 
 			if (cnt == 4) {
 				Period period = Period(date, time, duration, penalty, id);
-				this->maxPeriodPenalty += penalty;
 				this->periods.push_back(period);
 				id++;
 			}
@@ -182,7 +179,6 @@ void Data::readRooms()
 
 			if (cnt == 2) {
 				Room room = Room(capacity, penalty, id);
-				this->maxRoomPenalty += penalty;
 				this->rooms.push_back(room);
 				id++;
 			}
@@ -388,16 +384,6 @@ int Data::getPeriodsCnt() const
 int Data::getRoomsCnt() const
 {
 	return this->roomsCnt;
-}
-
-int Data::getMaxPeriodPenalty() const
-{
-	return this->maxPeriodPenalty;
-}
-
-int Data::getMaxRoomPenalty() const
-{
-	return this->maxRoomPenalty;
 }
 
 std::string Data::getExamRoomConstraint(int exam) const

@@ -15,4 +15,6 @@ public:
 
 	int getDuration() ;
 	std::vector<int> getStudents() ;
+
+	std::vector<int> getOverlappingStudents(Exam* exam);
 };

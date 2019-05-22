@@ -31,9 +31,6 @@ class Data {
 	std::vector<Period> periods;
 	std::vector<Room> rooms;
 
-	int maxPeriodPenalty;
-	int maxRoomPenalty;
-
 	std::map<int, std::string> roomConstraints;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints;
 	std::map<std::string, std::vector<int>> periodDays; //TODO mudar este nome que nao é o mais feliz
@@ -55,9 +52,6 @@ public:
 	int getExamsCnt() const;
 	int getPeriodsCnt() const;
 	int getRoomsCnt() const;
-
-	int getMaxPeriodPenalty() const;
-	int getMaxRoomPenalty() const;
 
 	std::string getExamRoomConstraint(int exam) const;
 	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints() const;

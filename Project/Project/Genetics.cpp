@@ -7,7 +7,7 @@
 #include <iterator>     
 #include <chrono>
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15, 30000)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 8000, 30, 15, 0)
 {
 }
 
@@ -98,7 +98,6 @@ void Genetics::insertPopulationBestElements(std::set<Node>* prevPopulation, std:
 Node Genetics::solve(std::set<Node> population)
 {
 	int bestPenalty = -1, bestNoFaults, penalty, noFaults;
-	int maxRoomPeriodPenalty = this->data->getMaxRoomPenalty() + this->data->getMaxPeriodPenalty();
 	Node elem1, elem2, child;
 
 	const auto begin = clock();
@@ -127,8 +126,6 @@ Node Genetics::solve(std::set<Node> population)
 				bestNoFaults = noFaults;
 			}
 
-			/*|| (this->data->getExamsCnt() == this->data->getPeriodsCnt() && this->data->getExamsCnt() == this->data->getRoomsCnt()
-					&& penalty == maxRoomPeriodPenalty)))*/
 			if ((noFaults == 0 && penalty == 0) 
 				|| (maxTimeMilliseconds > 0L && ((clock() - begin) / CLOCKS_PER_SEC *1000  >= maxTimeMilliseconds))) {
 				

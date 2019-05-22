@@ -8,6 +8,7 @@ int main()
 
 	DataExam dataExam = DataExam();
 	dataExam.writeExams();
+	dataExam.writeIncompatibilitiesTable();
 
 	DataRoom dataRoom = DataRoom();
 	dataRoom.writeRooms();

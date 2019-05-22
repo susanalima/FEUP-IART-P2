@@ -15,6 +15,7 @@ DataExam::DataExam()
 {
 	this->readExamInfo();
 	this->buildExams();
+	this->buildIncompatibilitiesTable();
 }
 
 DataExam::DataExam(int nrExams, std::pair<int, int> nrStudents, std::pair<int, int> duration)
@@ -23,6 +24,7 @@ DataExam::DataExam(int nrExams, std::pair<int, int> nrStudents, std::pair<int, i
 	this->nrStudents = nrStudents;
 	this->duration = duration;
 	this->buildExams();
+	this->buildIncompatibilitiesTable();
 }
 
 void DataExam::readExamInfo()
@@ -121,4 +123,30 @@ void DataExam::buildExams()
 		lastStudent += j;
 		this->exams.push_back(Exam(eDuration, eStudents));
 	}
+}
+
+void DataExam::buildIncompatibilitiesTable()
+{
+	int nrOverlaps;
+	for (int i = 0; i < this->exams.size(); i++) {
+		Exam exam1 = this->exams.at(i);
+		for (int j = i + 1; j < this->exams.size(); j++) {
+			Exam exam2 = this->exams.at(j);
+			nrOverlaps = exam1.getOverlappingStudents(&exam2).size();
+			this->incompatibilitiesTable.insert(std::pair<std::pair<int, int>, int>(std::pair<int, int>(i, j), nrOverlaps));
+		}
+	}
+}
+
+void DataExam::writeIncompatibilitiesTable()
+{
+	std::vector<int> students;
+	std::ofstream outfile("incompatibilitiesTable.txt");
+	outfile << "incompatibilitiesTable:"  << std::endl;
+	
+	for (auto it = this->incompatibilitiesTable.begin(); it != this->incompatibilitiesTable.end(); it++)
+	{
+		outfile << it->first.first << ":" << it->first.second << "-" << it->second << std::endl;
+	}
+	outfile.close();
 }
