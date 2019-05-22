@@ -1,0 +1,2 @@
+RoomHardConstraints
+1, ROOM_EXCLUSIVE  

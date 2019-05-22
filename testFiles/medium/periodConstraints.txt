@@ -1,0 +1,6 @@
+PeriodHardConstraints
+0, AFTER, 1
+3, EXAM_COINCIDENCE, 4
+5, AFTER, 7
+3, AFTER, 5
+5, EXAM_COINCIDENCE, 8
