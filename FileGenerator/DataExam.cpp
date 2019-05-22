@@ -1,5 +1,5 @@
 #include "DataExam.h"
-
+#include "Utils.h"
 #include <iostream>
 #include <fstream>  
 #include <random>
@@ -101,21 +101,20 @@ void DataExam::writeExams()
 
 void DataExam::buildExams()
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
+	
 	int eDuration, eNrStudents;
 	int lastStudent = 0;
 	int j, index;
 	for (int i = 0; i < this->nrExams; i++) {
-		eDuration = mt() % (this->duration.second - this->duration.first + 1) + this->duration.first;
-		eNrStudents = mt() % (this->nrStudents.second - this->nrStudents.first + 1) + this->nrStudents.first;
-		
+		eDuration = random(this->duration.first, this->duration.second);
+		eNrStudents = random(this->nrStudents.first, this->nrStudents.second);
+
 		std::vector<int> eStudents;
 		j = 0;
 		for (; j < eNrStudents; j++) {
-			int n = mt() % 100 + 1;
-			if (n <= 15)
-				index = mt() % this->nrExams * this->nrStudents.second + 1;
+			int n = random(1, 100);
+			if (n <= 10)
+				index = random(1, this->nrExams * this->nrStudents.second);
 			else
 				index = j + lastStudent;
 			eStudents.push_back(index);

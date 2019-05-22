@@ -1,5 +1,5 @@
 #include "DataRoom.h"
-
+#include "Utils.h"
 
 
 
@@ -85,12 +85,10 @@ void DataRoom::writeRooms()
 
 void DataRoom::buildRooms()
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
 	int rCapacity, rPenalty;
 	for (int i = 0; i < this->nrRooms; i++) {
-		rCapacity = mt() % (this->capacity.second - this->capacity.first + 1) + this->capacity.first;
-		rPenalty = mt() % (this->penalty.second - this->penalty.first + 1) + this->penalty.first;
+		rCapacity = random(this->capacity.first, this->capacity.second);
+		rPenalty = random(this->penalty.first, this->penalty.second);
 		this->rooms.push_back(std::pair<int, int>(rCapacity, rPenalty));
 	}
 }

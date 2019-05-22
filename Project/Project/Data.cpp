@@ -437,7 +437,6 @@ void Data::printNodeInfo(Node* node)
 }
 
 
-// fazer refactoring nesta porra
 void Data::evaluateSolution(Node* solution)
 {
 	int penalty = 0, noFaults = 0, roomIndex, periodIndex;

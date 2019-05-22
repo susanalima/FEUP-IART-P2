@@ -1,4 +1,5 @@
 #include "DataPeriod.h"
+#include "Utils.h"
 #include <iostream>
 #include <iomanip>
 
@@ -113,16 +114,16 @@ void DataPeriod::writePeriods()
 
 void DataPeriod::buildPeriods()
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
 	int pDay, pMonth, pYear, pHour, pDuration, pPenalty;
 	for (int i = 0; i < this->nrPeriods; i++) {
 		pYear = this->year;
-		pDay = mt() % (this->day.second - this->day.first + 1) + this->day.first;
-		pMonth = mt() % (this->month.second - this->month.first + 1) + this->month.first;
-		pHour = mt() % (this->hour.second - this->hour.first + 1) + this->hour.first;
-		pDuration = mt() % (this->duration.second - this->duration.first + 1) + this->duration.first;
-		pPenalty = mt() % (this->penalty.second - this->penalty.first + 1) + this->penalty.first;
+
+		pDay = random(this->day.first, this->day.second);
+		pMonth = random(this->month.first, this->month.second);
+		pHour = random(this->hour.first, this->hour.second);
+		pDuration = random(this->duration.first, this->duration.second);
+		pPenalty = random(this->penalty.first, this->penalty.second);
+
 		this->periods.push_back(Period(pDay, pMonth, pYear, pHour, pDuration, pPenalty));
 	}
 

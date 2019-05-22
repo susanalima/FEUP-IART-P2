@@ -7,7 +7,7 @@
 #include <iterator>     
 #include <chrono>
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 8000, 30, 15, 0)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15, 0)
 {
 }
 
@@ -32,9 +32,7 @@ void Genetics::printBest()
 //change to choose from the best
 Node Genetics::randomSelection(std::set<Node>* population)
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	int n = mt() % population->size();
+	int n = this->random(0, population->size() -1);
 	int index = 0;
 	auto it = population->begin();
 	std::advance(it, n);
@@ -44,32 +42,25 @@ Node Genetics::randomSelection(std::set<Node>* population)
 
 void Genetics::mutate(Node* elem)
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	int n = mt() % 100 + 1;  //random number between 1 and 100
+	int n = this->random(1,100);  //random number between 1 and 100
 
 	if (n > this->mutationProbability)
 		return;
 
-	int nrOfMutations = mt() % elem->getAnswersSize() + 1;
+	int nrOfMutations = this->random(1, elem->getAnswersSize());
 	int index, randomPeriod, randomRoom;
 
 	for (int i = 0; i < nrOfMutations; i++) {
-		 index = mt() % elem->getAnswersSize();
-		 randomPeriod = mt() % this->data->getPeriodsCnt() ;
-		 randomRoom = mt() % this->data->getRoomsCnt();
+		 index = this->random(0, elem->getAnswersSize() -1);
+		 randomPeriod = this->random(0, this->data->getPeriodsCnt() -1);
+		 randomRoom = this->random(0, this->data->getRoomsCnt() -1);
 		 elem->setAnswer(index, randomPeriod, randomRoom);
 	}
 }
 
-/*
-	pair<period, room>
-std::vector<std::pair<int, int>> answers; */
 Node Genetics::reproduce(Node* elem1, Node* elem2)
 {
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	int c = mt() % elem1->getAnswersSize() ;
+	int c = this->random(0, elem1->getAnswersSize() - 1);
 
 	std::vector<std::pair<int, int>> elemAnswers = elem1->getAnswers();
 	std::vector<std::pair<int, int>> answers1(elemAnswers.begin(), elemAnswers.begin()+ c);
@@ -91,6 +82,15 @@ void Genetics::insertPopulationBestElements(std::set<Node>* prevPopulation, std:
 	auto bg = prevPopulation->begin();
 	std::advance(bg, ad);
 	newPopulation->insert(prevPopulation->begin(), bg );
+}
+
+int Genetics::random(int min, int max)
+{
+	std::mt19937::result_type seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	std::mt19937 rng(seed);
+	std::uniform_int_distribution<int> gen(min, max); 
+	int r = gen(rng);
+	return r;
 }
 
 

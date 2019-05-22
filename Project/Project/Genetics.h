@@ -29,4 +29,5 @@ private:
 	void mutate(Node* elem );
 	Node reproduce(Node* elem1, Node* elem2);
 	void insertPopulationBestElements(std::set<Node>* prevPopulation, std::set<Node>* newPopulation);
+	int random(int min, int max);
 };
