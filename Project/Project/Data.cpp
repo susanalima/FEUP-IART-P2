@@ -14,6 +14,25 @@ Data::Data()
 	this->periodsCnt = 0;
 	this->roomsCnt = 0;
 
+	this->folderLoc = "";
+
+	this->read();
+
+	std::sort(this->periods.begin(), this->periods.end());
+	std::sort(this->rooms.begin(), this->rooms.end());
+
+	buildPeriodDays();
+	buildIncompatibilitiesTable();
+}
+
+Data::Data(std::string folderLoc)
+{
+	this->examsCnt = 0;
+	this->periodsCnt = 0;
+	this->roomsCnt = 0;
+
+	this->folderLoc = folderLoc;
+
 	this->read();
 
 	std::sort(this->periods.begin(), this->periods.end());
@@ -24,7 +43,7 @@ Data::Data()
 }
 
 void Data::buildPeriodDays() {
-	for (int i = 0; i < this->periods.size(); i++) {
+	for (auto i = 0; i < this->periods.size(); i++) {
 		std::string sDate = this->periods.at(i).getDate().getDate();
 		auto it = this->periodDays.find(sDate);
 		if (it != this->periodDays.end()) {
@@ -41,9 +60,9 @@ void Data::buildPeriodDays() {
 void Data::buildIncompatibilitiesTable()
 {
 	int nrOverlaps;
-	for (int i = 0; i < this->exams.size(); i++) {
+	for (auto i = 0; i < this->exams.size(); i++) {
 		Exam exam1 = this->exams.at(i);
-		for (int j = i + 1; j < this->exams.size(); j++) {
+		for (auto j = i + 1; j < this->exams.size(); j++) {
 			Exam exam2 = this->exams.at(j);
 			nrOverlaps = exam1.getOverlappingStudents(&exam2).size();
 			this->incompatibilitiesTable.insert(std::pair<std::pair<int, int>, int>(std::pair<int, int>(i, j), nrOverlaps));
@@ -64,7 +83,7 @@ void Data::read()
 void Data::readExams()
 {
 	std::string line;
-	std::ifstream input(this->exams_input);
+	std::ifstream input(this->folderLoc + this->exams_input);
 	if (input.good()) 
 	{
 		if (getline(input, line)) {
@@ -105,7 +124,7 @@ void Data::readExams()
 void Data::readPeriods()
 {
 	std::string line;
-	std::ifstream input(this->periods_input);
+	std::ifstream input(this->folderLoc + this->periods_input);
 	if (input.good())
 	{
 		if (getline(input, line)) {
@@ -153,7 +172,7 @@ void Data::readPeriods()
 void Data::readRooms()
 {
 	std::string line;
-	std::ifstream input(this->rooms_input);
+	std::ifstream input(this->folderLoc + this->rooms_input);
 	if (input.good())
 	{
 		if (getline(input, line)) {
@@ -195,7 +214,7 @@ void Data::readRooms()
 void Data::readRoomContraints()
 {
 	std::string line;
-	std::ifstream input(this->roomConstraints_input);
+	std::ifstream input(this->folderLoc + this->roomConstraints_input);
 	if (input.good())
 	{
 
@@ -232,7 +251,7 @@ void Data::readRoomContraints()
 void Data::readPeriodContraints()
 {
 	std::string line;
-	std::ifstream input(this->periodConstraints_input);
+	std::ifstream input(this->folderLoc + this->periodConstraints_input);
 	if (input.good())
 	{
 		if (getline(input, line)) {
@@ -271,7 +290,7 @@ void Data::readPeriodContraints()
 void Data::readInstWeights()
 {
 	std::string line;
-	std::ifstream input(this->institutionalWeightings_input);
+	std::ifstream input(this->folderLoc + this->institutionalWeightings_input);
 	if (input.good())
 	{
 		if (getline(input, line)) {
@@ -284,7 +303,7 @@ void Data::readInstWeights()
 			std::stringstream lineInput(line);
 			std::string cell;
 
-			int p1,p2,p3, cnt = 0;
+			int p1 = 0,p2 = 0,p3 = 0, cnt = 0;
 			std::string constraint;
 			while (getline(lineInput, cell, ','))
 			{

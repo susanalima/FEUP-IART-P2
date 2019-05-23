@@ -20,6 +20,10 @@ void HillClimbing::printBest()
 	this->best.print();
 }
 
+HillClimbing::HillClimbing()
+{
+}
+
 HillClimbing::HillClimbing(Data *data, Node initial)
 {
 	this->data = data;

@@ -27,6 +27,8 @@ class Data {
 	int periodsCnt;
 	int roomsCnt;
 
+	std::string folderLoc;
+
 	std::vector<Exam> exams;
 	std::vector<Period> periods;
 	std::vector<Room> rooms;
@@ -42,6 +44,7 @@ class Data {
 public:
 
 	Data();
+	Data(std::string folderLoc);
 	Node generateInitialState();
 	int getStateValue(Node solution);
 

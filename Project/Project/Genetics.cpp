@@ -7,6 +7,10 @@
 #include <iterator>     
 #include <chrono>
 
+Genetics::Genetics()
+{
+}
+
 Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15, 0)
 {
 }

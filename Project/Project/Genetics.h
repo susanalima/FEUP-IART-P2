@@ -16,6 +16,7 @@ class Genetics {
 
 public:
 
+	Genetics();
 	Genetics(Data* data, Node initial);
 	Genetics(Data* data, Node initial, int populationSize, int maxNoGenerations, int mutationProbability, int parentEliteNo, long maxTimeMilliseconds);
 	

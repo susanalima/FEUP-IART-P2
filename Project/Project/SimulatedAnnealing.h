@@ -13,6 +13,7 @@ class SimulatedAnnealing {
 
 public:
 
+	SimulatedAnnealing();
 	SimulatedAnnealing(Data* data, Node initial, double temperature, double coolingRate);
 	Node solve();
 

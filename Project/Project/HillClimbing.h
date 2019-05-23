@@ -9,7 +9,7 @@ class HillClimbing {
 	Node best;
 
 public:
-
+	HillClimbing();
 	HillClimbing(Data *data, Node initial);
 	Node solve();
 

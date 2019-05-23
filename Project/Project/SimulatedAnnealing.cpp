@@ -6,6 +6,10 @@
 #include <chrono>
 #include <vector>
 
+SimulatedAnnealing::SimulatedAnnealing()
+{
+}
+
 SimulatedAnnealing::SimulatedAnnealing(Data* data, Node initial, double temperature, double coolingRate)
 {
 	this->data = data;
