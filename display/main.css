@@ -1,0 +1,16 @@
+    table {
+        border: 1px solid black;
+    }
+
+    table * {
+        border: 1px solid black;
+    }
+
+    td div {
+        height: 0.7em;
+        background-color: pink;
+    }
+
+    td {
+        width: 5em;
+    }
