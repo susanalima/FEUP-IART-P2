@@ -148,4 +148,10 @@ bool operator==(const Room& lhs, const Room& rhs);
 bool operator< (const Exam& lhs, const Exam& rhs);
 bool operator==(const Exam& lhs, const Exam& rhs);
 
-
+struct dateComparator {
+	bool operator()(const std::string& a, const std::string& b) const {
+		Date dA = Date(a);
+		Date dB = Date(b);
+		return dA < dB;
+	}
+};

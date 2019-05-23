@@ -35,7 +35,7 @@ class Data {
 
 	std::map<int, std::string> roomConstraints;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints;
-	std::map<std::string, std::vector<int>> periodDays; 
+	std::map<std::string, std::vector<int>, dateComparator> periodDays; 
 
 	InstitutionalWeightings instWeights;
 
@@ -61,7 +61,7 @@ public:
 	std::string getExamRoomConstraint(int exam) const;
 	std::multimap<int, std::pair<int, std::string>> getPeriodConstraints() const;
 	InstitutionalWeightings getInstWeights() const;
-	std::map<std::string, std::vector<int>> getPeriodDays() const;
+	std::map<std::string, std::vector<int>, dateComparator> getPeriodDays() const;
 
 	int getExamsOverlaps(int examIndex1, int examIndex2) const;
 

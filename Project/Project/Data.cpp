@@ -445,7 +445,7 @@ InstitutionalWeightings Data::getInstWeights() const
 	return this->instWeights;
 }
 
-std::map<std::string, std::vector<int>> Data::getPeriodDays() const
+std::map<std::string, std::vector<int>, dateComparator> Data::getPeriodDays() const
 {
 	return this->periodDays;
 }
