@@ -105,6 +105,7 @@ Time::Time()
 
 Time::Time(std::string time)
 {
+	this->time_ = time;
 	this->hours = 0;
 	this->minutes = 0;
 	this->seconds = 0;
@@ -144,6 +145,11 @@ int Time::getMinutes() const
 int Time::getSeconds() const
 {
 	return this->seconds;
+}
+
+std::string Time::getTime() const
+{
+	return this->time_;
 }
 
 Date::Date()

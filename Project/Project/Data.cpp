@@ -70,6 +70,26 @@ void Data::buildIncompatibilitiesTable()
 	}
 }
 
+void Data::buildPeriodExams(Node* solution)
+{
+	std::pair<int, int> answer;
+	int periodIndex;
+	for (auto i = 0; i < solution->getAnswersSize(); i++) {
+		answer = solution->getAnswer(i);
+		periodIndex = answer.first;
+		auto it = this->periodExams.find(periodIndex);
+		if (it != this->periodExams.end()) {
+			it->second.push_back(i);
+		}
+		else {
+			std::vector<int> exams;
+			exams.push_back(i);
+			periodExams.insert(std::pair<int, std::vector<int>>(periodIndex, exams));
+		}
+	}
+}
+
+
 void Data::read()
 {
 	this->readExams();
@@ -660,4 +680,84 @@ int Data::applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, i
 		noFaults++;  //penalty of exceding the room's capacity
 
 	return noFaults;
+}
+
+
+void Data::buildDisplay(Node* node)
+{
+	buildPeriodExams(node);
+	std::ofstream outfile("schedule.html");
+	outfile << "<!DOCTYPE html>" << std::endl;
+	outfile << "<html lang=\"en\">" << std::endl;
+	outfile << "<head>" << std::endl;
+	outfile << "<meta charset=\"UTF - 8\" />" << std::endl;
+	outfile << "<meta name=\"viewport\" content=\"width = device - width, initial - scale = 1.0\" />" << std::endl;
+	outfile << "<meta http-equiv=\"X - UA - Compatible\" content=\"ie = edge\" />" << std::endl;
+	outfile << "<link rel=\"stylesheet\" type=\"text" << "/css\" href=\"main.css\" media=\"screen\" />" << std::endl;
+	outfile << "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\"crossorigin = \"anonymous\" />" << std::endl;
+
+	outfile << "<title>Document</title>" << std::endl;
+	outfile << "</head>" << std::endl;
+	outfile << "<body>" << std::endl;
+	outfile << "<table class = \"table table-bordered borderless\">" << std::endl;
+	for (auto it = this->periodDays.begin(); it != this->periodDays.end(); it++) {
+		outfile << "<td class=\"borderless\">" << std::endl;
+		outfile << "<table>" << std::endl;
+		outfile << "<tr>" << std::endl;
+		outfile << "<td></td>" << std::endl;
+		outfile << "<td>" << it->first << "</td>" << std::endl;
+		outfile << "</tr>" << std::endl;
+
+		for (auto pI = 0; pI < it->second.size(); pI++) {
+			outfile << "<tr>" << std::endl;
+			outfile << "<td>" << this->periods.at(it->second.at(pI)).getTime().getTime() << " (" << this->periods.at(it->second.at(pI)).getId() << ")</td>" << std::endl;
+			outfile << "<td>" << std::endl;
+			auto pIter = this->periodExams.find(it->second.at(pI));
+			if (pIter == this->periodExams.end()) {
+				continue;
+			}
+			int examIndex, roomIndex;
+			for (auto eI = 0; eI < pIter->second.size(); eI++) {
+				examIndex = pIter->second.at(eI);
+				roomIndex = node->getAnswer(examIndex).second;
+				outfile << "<div class=\"modalBtn\"><a data-toggle=\"modal\" data-target=\"#e" << examIndex << "Modal\">" << "exam:" << examIndex;
+				outfile << " room:" << this->rooms.at(roomIndex).getId() << "</a></div>" << std::endl;
+				outfile << "<div class = \"modal fade\" id = \"e" << examIndex << "Modal\" tabindex = \"-1\" role = \"dialog\" aria-labelledby=\"e" << examIndex << "ModalLabel\" aria-hidden = \"true\">" << std::endl;
+				outfile << "<div class = \"modal-dialog\" role = \"document\">" << std::endl;
+				outfile << "<div class = \"modal-content\">" << std::endl;
+				outfile << "<div class = \"modal-header\">" << std::endl;
+				outfile << "<h5 class = \"modal-title\"id = \"e" << examIndex << "ModalLabel\">" << "exam " << examIndex << " in room " << this->rooms.at(roomIndex).getId() << "</h5>" << std::endl;
+				outfile << "<button type = \"button\" class = \"close\" data-dismiss = \"modal\" aria-label = \"Close\">" << std::endl;
+				outfile << "<span aria - hidden = \"true\"> & times; </span>" << std::endl;
+				outfile << "</button>" << std::endl;
+				outfile << "</div>" << std::endl;
+				outfile << "<div class = \"modal-body\">" << std::endl;
+				outfile << "<ul class = \"list-group list-group-flush\">" << std::endl;
+				outfile << "<li class = \"list-group-item\">exam duration: "<< this->exams.at(examIndex).getDuration() << " minutes </li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">exam number of students : "<< this->exams.at(examIndex).getStudentsCnt() << "</li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">room capacity: " << this->rooms.at(roomIndex).getCapacity() << " students </li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">room penalty : " << this->rooms.at(roomIndex).getPenalty() << "</li>" << std::endl;
+				outfile << "</ul>" << std::endl;
+				outfile << "</div>" << std::endl;
+				outfile << "<div class = \"modal-footer\">" << std::endl;
+				outfile << "<button type = \"button\" class = \"btn btn-secondary\" data - dismiss = \"modal\">Close</button>" << std::endl;
+				outfile << "</div>" << std::endl;
+				outfile << "</div>" << std::endl;
+				outfile << "</div>" << std::endl;
+				outfile << "</div>" << std::endl;
+			}
+			outfile << "</td>" << std::endl;
+			outfile << "</tr>" << std::endl;
+		}
+		outfile << "</table>" << std::endl;
+		outfile << "</td>" << std::endl;
+	}
+	outfile << "</table>" << std::endl;
+	outfile << "</body>" << std::endl;
+
+	outfile << "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>" << std::endl;
+	outfile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script>" << std::endl;
+	outfile << "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>" << std::endl;
+	outfile << "</html>" << std::endl;
+	outfile.close();
 }

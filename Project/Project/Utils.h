@@ -8,6 +8,7 @@ class Time {
 	int hours;
 	int minutes;
 	int seconds;
+	std::string time_;
 
 public:
 	Time();
@@ -16,7 +17,7 @@ public:
 	int getHours() const;
 	int getMinutes() const;
 	int getSeconds() const;
-
+	std::string getTime() const;
 };
 
 class Date {

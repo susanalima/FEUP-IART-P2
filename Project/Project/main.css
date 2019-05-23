@@ -1,0 +1,26 @@
+    table {
+        border: 1px solid white;
+    }
+
+
+    .modalBtn {
+        width: 100%;
+        margin-bottom:0.2em;
+        background-color: pink !important
+    }
+
+    td {
+        padding: 0%;
+        width: 10%;
+    }
+
+    .borderless {
+        border:none !important;
+        padding:0.2em !important;
+    }
+
+    .modal-header {
+        background-color: pink !important
+    }
+ 
+
