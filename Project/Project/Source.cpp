@@ -33,7 +33,7 @@ void executeMultiple(Data data) {
 	set<Node> population;
 
 	double temp = 100;
-	double coolRate = 0.7;
+	double coolRate = 0.8;
 
 	auto start = std::chrono::high_resolution_clock::now();
 	auto finish = std::chrono::high_resolution_clock::now();
@@ -43,9 +43,9 @@ void executeMultiple(Data data) {
 	std::streambuf* coutbuf = std::cout.rdbuf(); 
 	std::cout.rdbuf(out.rdbuf());
 
-	//10 diff initial states
+	//5 diff initial states
 	cout << "Initial States:" << endl;
-	for (size_t j = 0; j < 10; j++)
+	for (size_t j = 0; j < 5; j++)
 	{
 		Node ini = data.generateInitialState();
 		data.evaluateSolution(&ini);
@@ -62,8 +62,8 @@ void executeMultiple(Data data) {
 		{
 			Node ini = initials.at(j);
 			double count = 0;
-			//10x per ini state
-			for (size_t k = 0; k < 10; k++)
+			//5x per ini state
+			for (size_t k = 0; k < 5; k++)
 			{
 				cout << i << ":" << j << ":";
 				switch (i)
@@ -85,7 +85,7 @@ void executeMultiple(Data data) {
 					count += elapsed.count();
 					break;
 				case 2:
-					gn = Genetics(&data, ini);
+					gn = Genetics(&data, ini, 50, 100000000000, 30, 15, 5000);
 					population.clear();
 					population.insert(ini);
 					start = std::chrono::high_resolution_clock::now();
@@ -97,7 +97,7 @@ void executeMultiple(Data data) {
 				}
 				cout << elapsed.count() << ":" << best.getNoFaults() << ":" << best.getPenalty() << endl;
 			}
-			cout << "\tMean:\t" << count / 10 << endl;
+			cout << "\tMean:\t" << count / 5 << endl;
 		}
 	}
 
@@ -178,7 +178,7 @@ void executeGenDiff(Data data) {
 
 	//10 diff initial states
 	cout << "Initial States:" << endl;
-	for (size_t j = 0; j < 10; j++)
+	for (size_t j = 0; j < 5; j++)
 	{
 		Node ini = data.generateInitialState();
 		data.evaluateSolution(&ini);
