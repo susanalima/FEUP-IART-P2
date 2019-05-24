@@ -11,7 +11,12 @@ Genetics::Genetics()
 {
 }
 
-Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 50, 1000, 30, 15, 0)
+Genetics::Genetics(Data* data, Node initial) : Genetics(data, initial, 30)
+{
+}
+
+
+Genetics::Genetics(Data* data, Node initial, int mutationProbability) : Genetics(data, initial, 50, 1000, mutationProbability, 15, 10000)
 {
 }
 

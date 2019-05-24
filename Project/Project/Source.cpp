@@ -170,10 +170,12 @@ void mainMenu(Data data) {
 
 	double temp = 0;
 	double coolRate = 0;
+	int mutProbability = 0;
 
 	bool ending = false;
 	while (!ending)
 	{
+		population.clear();
 		mainMenuDisplay();
 		cin >> opt;
 
@@ -206,7 +208,10 @@ void mainMenu(Data data) {
 			cout << "Initial State Info" << endl;
 			data.printNodeInfo(&ini);
 			cout << "Genetics Info" << endl;
-			gn = Genetics(&data, ini);
+			cout << "\tMutation Probability (0-100): " << endl;
+			cin >> mutProbability;
+
+			gn = Genetics(&data, ini, mutProbability);
 			population.insert(ini);
 			best = gn.solve(population);
 			data.printNodeInfo(&best);
