@@ -16,6 +16,10 @@
         background-color: pink !important
     }
 
+    .modalBtn:hover {
+        background-color: rgba(238, 153, 153, 0.911) !important
+    }
+
     td {
         padding: 0%;
         width: 10%;
