@@ -261,7 +261,7 @@ void mainMenu(Data data) {
 			hc = HillClimbing(&data, ini);
 			best = hc.solve();
 			data.printNodeInfo(&best);
-			data.buildDisplay(&best);
+			data.buildDisplay(&best, "Hill Climbing");
 			break;
 		case 2:
 			cout << "Initial State Info" << endl;
@@ -275,7 +275,7 @@ void mainMenu(Data data) {
 			sa = SimulatedAnnealing(&data, ini, temp, coolRate);
 			best = sa.solve();
 			data.printNodeInfo(&best);
-			data.buildDisplay(&best);
+			data.buildDisplay(&best, "Simulated Annealing");
 			break;
 		case 3:
 			cout << "Initial State Info" << endl;
@@ -305,7 +305,7 @@ void mainMenu(Data data) {
 			population.insert(ini);
 			best = gn.solve(population);
 			data.printNodeInfo(&best);
-			data.buildDisplay(&best);
+			data.buildDisplay(&best, "Genetics");
 			break;
 		case 4:
 			executeMultiple(data);

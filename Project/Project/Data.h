@@ -72,7 +72,7 @@ public:
 
 	void evaluateSolution(Node* solution);
 
-	void buildDisplay(Node *node);
+	void buildDisplay(Node *node, std::string aName);
 
 private:
 

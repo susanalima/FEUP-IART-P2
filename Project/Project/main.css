@@ -34,5 +34,19 @@
     .modal-header {
         background-color: pink !important
     }
+
+    .title {
+        max-width: 90%;
+        margin:auto;
+        margin-top:0.5em;
+       color: rgba(238, 153, 153, 0.911); 
+    }
+ 
+    .subtitle {
+        max-width: 90%;
+        margin:auto;
+        margin-top:0.5em;
+       color: pink; 
+    }
  
 

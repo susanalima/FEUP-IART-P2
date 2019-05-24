@@ -742,7 +742,7 @@ int Data::applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, i
 }
 
 
-void Data::buildDisplay(Node* node)
+void Data::buildDisplay(Node* node, std::string aName)
 {
 	buildPeriodExams(node);
 	std::ofstream outfile("schedule.html");
@@ -757,6 +757,9 @@ void Data::buildDisplay(Node* node)
 	outfile << "<title>Document</title>" << std::endl;
 	outfile << "</head>" << std::endl;
 	outfile << "<body>" << std::endl;
+	outfile << "<h2 class=\" title\">" << aName << "</h2>" << std::endl;
+	outfile << "<h5 class=\"subtitle\"> Hard Contraints violations number: " << node->getNoFaults() << "</h5>" << std::endl;
+	outfile << "<h5 class=\"subtitle\"> Soft Constraints total penalty: " << node->getPenalty() << "</h5>" << std::endl;
 	outfile << "<table class = \"table table-bordered borderless main\">" << std::endl;
 	for (auto it = this->periodDays.begin(); it != this->periodDays.end(); it++) {
 		outfile << "<td class=\"borderless\">" << std::endl;
@@ -805,7 +808,6 @@ void Data::buildDisplay(Node* node)
 					}
 				}
 				outfile << "</li>" << std::endl;
-			
 				outfile << "<li class = \"list-group-item\">room capacity: " << this->rooms.at(roomIndex).getCapacity() << " students </li>" << std::endl;
 				outfile << "<li class = \"list-group-item\">room penalty: " << this->rooms.at(roomIndex).getPenalty() << "</li>" << std::endl;
 				auto rE = this->roomConstraints.find(examIndex);
