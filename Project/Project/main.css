@@ -17,6 +17,7 @@
     }
 
     .modalBtn:hover {
+        cursor: pointer;
         background-color: rgba(238, 153, 153, 0.911) !important
     }
 

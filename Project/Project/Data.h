@@ -35,6 +35,7 @@ class Data {
 
 	std::map<int, std::string> roomConstraints;
 	std::multimap<int, std::pair<int, std::string>> periodConstraints;
+	
 	std::map<std::string, std::vector<int>, dateComparator> periodDays; 
 
 	InstitutionalWeightings instWeights;
@@ -42,6 +43,8 @@ class Data {
 	std::map<std::pair<int, int>, int> incompatibilitiesTable;
 
 	std::map<int, std::vector<int>> periodExams; 
+
+	std::map<int, std::vector<int>> periodIncompatibilities;
 
 public:
 
@@ -83,6 +86,8 @@ private:
 	void buildPeriodDays();
 	void buildIncompatibilitiesTable();
 	void buildPeriodExams(Node *solution);
+
+	void buildPeriodIncompatibilities();
 
 	int applyPeriodHardConstraints(int index, std::vector<std::pair<int, int>>* schedule, Period* period, Exam* exam, int periodIndex);
 	int applyGeneralHardConstraints(int index, std::map<std::pair<int, int>, int>* examSlot, std::vector<std::pair<int, int>>* schedule, Exam* exam, Period* period, Room* room);

@@ -23,6 +23,7 @@ Data::Data()
 
 	buildPeriodDays();
 	buildIncompatibilitiesTable();
+	buildPeriodIncompatibilities();
 }
 
 Data::Data(std::string folderLoc)
@@ -40,6 +41,7 @@ Data::Data(std::string folderLoc)
 
 	buildPeriodDays();
 	buildIncompatibilitiesTable();
+	buildPeriodIncompatibilities();
 }
 
 void Data::buildPeriodDays() {
@@ -86,6 +88,29 @@ void Data::buildPeriodExams(Node* solution)
 			std::vector<int> exams;
 			exams.push_back(i);
 			periodExams.insert(std::pair<int, std::vector<int>>(periodIndex, exams));
+		}
+	}
+}
+
+void Data::buildPeriodIncompatibilities()
+{
+	for (auto i = 0; i < this->periods.size(); i++) {
+		Period p1 = this->periods.at(i);
+		for (auto j = i + 1; j < this->periods.size(); j++) {
+			Period p2 = this->periods.at(j);
+			if (p1.getDate() == p2.getDate()) {
+				if (p1.getEndTime() > p2.getTime() && p1.getTime() <= p2.getTime()) {
+					auto it = this->periodIncompatibilities.find(i);
+					if (it != this->periodIncompatibilities.end()) {
+						it->second.push_back(j);
+					}
+					else {
+						std::vector<int> periods;
+						periods.push_back(j);
+						this->periodIncompatibilities.insert(std::pair<int, std::vector<int>>(i, periods));
+					}
+				}
+			}	
 		}
 	}
 }
@@ -553,6 +578,11 @@ void Data::evaluateSolution(Node* solution)
 
 		std::string sDate = this->periods.at(currentPeriodIndex).getDate().getDate(); //dia do periodo 
 		std::vector<int> sameDayPeriods = this->periodDays[sDate]; //todos os periodos daquele dia
+		std::vector<int> collidingPeriods;
+		collidingPeriods.clear();
+		auto tmp = this->periodIncompatibilities.find(currentPeriodIndex);
+		if(tmp != this->periodIncompatibilities.end())
+			collidingPeriods = this->periodIncompatibilities.find(currentPeriodIndex)->second;
 
 		int sameDayPeriodIndex;  //index do periodo daquele dia
 		std::vector<int> sameDayExams;
@@ -588,7 +618,25 @@ void Data::evaluateSolution(Node* solution)
 		}
 
 
-		for (int i = 0; i < periodExams.size(); i++) {
+		for (auto k = 0; k < collidingPeriods.size(); k++) {
+			auto tI = periodInfo.find(k);
+			if (tI == periodInfo.end())
+				continue;
+			std::vector<int> tExams =  tI->second.second;
+			for (auto i = 0; i < periodExams.size(); i++) {
+				e1 = periodExams.at(i);
+
+				//ve as colisoes de todos os exames de periodos coincidentes
+				for (auto j = 0; j < tExams.size(); j++) {
+					e2 = tExams.at(j);
+					if (getExamsOverlaps(e1, e2) != 0) {
+						noFaults++;
+					}
+				}
+			}
+		}
+
+		for (auto i = 0; i < periodExams.size(); i++) {
 			e1 = periodExams.at(i);
 
 			//ve as colisoes de todos os exames de um periodo
@@ -600,7 +648,7 @@ void Data::evaluateSolution(Node* solution)
 			}
 
 			//Period Spread constraint
-			for (int j = currentPeriodIndex + 1; j < periods.size(); j++) {
+			for (auto j = currentPeriodIndex + 1; j < periods.size(); j++) {
 
 				auto iter = periodInfo.find(j);
 				if (iter == periodInfo.end())
