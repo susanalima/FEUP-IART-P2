@@ -68,8 +68,16 @@ void Data::buildIncompatibilitiesTable()
 			Exam exam2 = this->exams.at(j);
 			nrOverlaps = exam1.getOverlappingStudents(&exam2).size();
 			this->incompatibilitiesTable.insert(std::pair<std::pair<int, int>, int>(std::pair<int, int>(i, j), nrOverlaps));
+			if (nrOverlaps > 0) {
+				this->exams.at(i).addIncompatibleExam(j);
+				this->exams.at(j).addIncompatibleExam(i);
+			}
 		}
 	}
+	/*for (auto it = this->incompatibilitiesTable.begin(); it != this->incompatibilitiesTable.end(); it++)
+	{
+		std::cout << it->first.first << ":" << it->first.second << "-" << it->second << std::endl;
+	}*/
 }
 
 void Data::buildPeriodExams(Node* solution)
@@ -326,9 +334,11 @@ void Data::readPeriodContraints()
 				auto end_pos = std::remove(constraint.begin(), constraint.end(), ' ');
 				constraint.erase(end_pos, constraint.end());
 				this->periodConstraints.insert(std::pair<int, std::pair<int, std::string>>(exam1, std::pair<int, std::string>(exam2, constraint)));
+				this->exams.at(exam1).addPeriodConstraint(exam2, constraint);
+				if(constraint.compare("AFTER") != 0)
+					this->exams.at(exam2).addPeriodConstraint(exam1, constraint);
 			}
 		}
-
 		input.close();
 	}
 }
@@ -744,7 +754,6 @@ void Data::buildDisplay(Node* node)
 	outfile << "<meta http-equiv=\"X - UA - Compatible\" content=\"ie = edge\" />" << std::endl;
 	outfile << "<link rel=\"stylesheet\" type=\"text" << "/css\" href=\"main.css\" media=\"screen\" />" << std::endl;
 	outfile << "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\"crossorigin = \"anonymous\" />" << std::endl;
-
 	outfile << "<title>Document</title>" << std::endl;
 	outfile << "</head>" << std::endl;
 	outfile << "<body>" << std::endl;
@@ -756,7 +765,6 @@ void Data::buildDisplay(Node* node)
 		outfile << "<td></td>" << std::endl;
 		outfile << "<td>" << it->first << "</td>" << std::endl;
 		outfile << "</tr>" << std::endl;
-
 		for (auto pI = 0; pI < it->second.size(); pI++) {
 			outfile << "<tr>" << std::endl;
 			outfile << "<td>" << this->periods.at(it->second.at(pI)).getTime().getTime() << " - " << this->periods.at(it->second.at(pI)).getEndTime().getTime();
@@ -770,6 +778,7 @@ void Data::buildDisplay(Node* node)
 			for (auto eI = 0; eI < pIter->second.size(); eI++) {
 				examIndex = pIter->second.at(eI);
 				roomIndex = node->getAnswer(examIndex).second;
+				Exam exam = this->exams.at(examIndex);
 				outfile << "<div class=\"modalBtn\"><a data-toggle=\"modal\" data-target=\"#e" << examIndex << "Modal\">" << "exam:" << examIndex;
 				outfile << " room:" << this->rooms.at(roomIndex).getId() << "</a></div>" << std::endl;
 				outfile << "<div class = \"modal fade\" id = \"e" << examIndex << "Modal\" tabindex = \"-1\" role = \"dialog\" aria-labelledby=\"e" << examIndex << "ModalLabel\" aria-hidden = \"true\">" << std::endl;
@@ -783,10 +792,36 @@ void Data::buildDisplay(Node* node)
 				outfile << "</div>" << std::endl;
 				outfile << "<div class = \"modal-body\">" << std::endl;
 				outfile << "<ul class = \"list-group list-group-flush\">" << std::endl;
-				outfile << "<li class = \"list-group-item\">exam duration: "<< this->exams.at(examIndex).getDuration() << " minutes </li>" << std::endl;
-				outfile << "<li class = \"list-group-item\">exam number of students : "<< this->exams.at(examIndex).getStudentsCnt() << "</li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">exam duration: "<< exam.getDuration() << " minutes </li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">exam number of students: "<< exam.getStudentsCnt() << "</li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">exams with overlapping students: ";
+				if (exam.getIncompatibleExams().size() == 0)
+					outfile << "none";
+				else {
+					for (auto i = 0; i < exam.getIncompatibleExams().size(); i++) {
+						outfile << exam.getIncompatibleExams().at(i);
+						if (i < exam.getIncompatibleExams().size() - 1)
+							outfile << ", ";
+					}
+				}
+				outfile << "</li>" << std::endl;
+			
 				outfile << "<li class = \"list-group-item\">room capacity: " << this->rooms.at(roomIndex).getCapacity() << " students </li>" << std::endl;
-				outfile << "<li class = \"list-group-item\">room penalty : " << this->rooms.at(roomIndex).getPenalty() << "</li>" << std::endl;
+				outfile << "<li class = \"list-group-item\">room penalty: " << this->rooms.at(roomIndex).getPenalty() << "</li>" << std::endl;
+				auto rE = this->roomConstraints.find(examIndex);
+				if (rE != this->roomConstraints.end() || exam.getPeriodConstraints().size() > 0) {
+					outfile << "<li class = \"list-group-item\">exam constraints: " << std::endl;
+					outfile << "<ol>" << std::endl;
+					if (rE != this->roomConstraints.end())
+						outfile << "<li class = \"list-group-item\">room exclusive</li>" << std::endl;
+
+					for (auto m = 0; m < exam.getPeriodConstraints().size(); m++) {
+						outfile << "<li class = \"list-group-item\">" << exam.getPeriodConstraints().at(m).second << " " << exam.getPeriodConstraints().at(m).first << "</li>" << std::endl;
+					}
+
+					outfile << "</ol>" << std::endl;
+					outfile << "</li>" << std::endl;
+				}
 				outfile << "</ul>" << std::endl;
 				outfile << "</div>" << std::endl;
 				outfile << "<div class = \"modal-footer\">" << std::endl;
@@ -804,7 +839,6 @@ void Data::buildDisplay(Node* node)
 	}
 	outfile << "</table>" << std::endl;
 	outfile << "</body>" << std::endl;
-
 	outfile << "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>" << std::endl;
 	outfile << "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script>" << std::endl;
 	outfile << "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>" << std::endl;

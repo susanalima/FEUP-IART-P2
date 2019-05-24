@@ -37,6 +37,26 @@ std::vector<int> Exam::getOverlappingStudents(Exam* exam)
 	return overlappingStudents;
 }
 
+void Exam::addIncompatibleExam(int examIndex)
+{
+	this->incompatibleExams.push_back(examIndex);
+}
+
+std::vector<int> Exam::getIncompatibleExams() const
+{
+	return this->incompatibleExams;
+}
+
+void Exam::addPeriodConstraint(int examIndex, std::string constraint)
+{
+	this->periodConstrains.push_back(std::pair<int, std::string>(examIndex, constraint));
+}
+
+std::vector<std::pair<int, std::string>> Exam::getPeriodConstraints() const
+{
+	return this->periodConstrains;
+}
+
 Period::Period(Date date, Time time, int duration, int penalty, int id)
 {
 	this->date = date;

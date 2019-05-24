@@ -40,18 +40,20 @@ public:
 class Exam {
 
 	int duration;
-	//int studentsCnt;
 	std::vector<int> students;
+	std::vector<int> incompatibleExams;
+	std::vector<std::pair<int, std::string>> periodConstrains;
 
 public:
 	Exam(int duration, std::vector<int> students);
 	int getDuration() const;
 	int getStudentsCnt() const;
 	std::vector<int> getStudents() const;
-
 	std::vector<int> getOverlappingStudents(Exam* exam);
-
-
+	void addIncompatibleExam(int examIndex);
+	std::vector<int> getIncompatibleExams() const;
+	void addPeriodConstraint(int examIndex, std::string constraint);
+	std::vector<std::pair<int, std::string>> getPeriodConstraints() const;
 };
 
 class Period {
