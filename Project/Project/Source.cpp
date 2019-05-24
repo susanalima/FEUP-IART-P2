@@ -86,6 +86,7 @@ void executeMultiple(Data data) {
 					break;
 				case 2:
 					gn = Genetics(&data, ini);
+					population.clear();
 					population.insert(ini);
 					start = std::chrono::high_resolution_clock::now();
 					best = gn.solve(population);
@@ -94,7 +95,7 @@ void executeMultiple(Data data) {
 					count += elapsed.count();
 					break;
 				}
-				cout << elapsed.count() << endl;
+				cout << elapsed.count() << ":" << best.getNoFaults() << ":" << best.getPenalty() << endl;
 			}
 			cout << "\tMean:\t" << count / 10 << endl;
 		}
@@ -109,10 +110,7 @@ void executeSADiff(Data data) {
 
 	Node best;
 	SimulatedAnnealing sa;
-	cout << "Initial States:" << endl;
-	Node ini = data.generateInitialState();
-	data.evaluateSolution(&ini);
-	data.printNodeInfo(&ini);
+	std::vector<Node> initials;
 
 	double temp = 100;
 
@@ -124,23 +122,94 @@ void executeSADiff(Data data) {
 	std::streambuf* coutbuf = std::cout.rdbuf();
 	std::cout.rdbuf(out.rdbuf());
 
-	for (size_t j = 1; j < 10; j++)
+	//5 diff initial states
+	cout << "Initial States:" << endl;
+	for (size_t j = 0; j < 5; j++)
 	{
-		double coolingRate = 0.1 * j;
-		double count = 0;
-		//10x per ini state
-		for (size_t k = 0; k < 10; k++)
+		Node ini = data.generateInitialState();
+		data.evaluateSolution(&ini);
+		initials.push_back(ini);
+		cout << "ID: " << j + 1 << endl;
+		data.printNodeInfo(&ini);
+	}
+
+	for (size_t i = 0; i < initials.size(); i++)
+	{
+		Node ini = initials.at(i);
+		for (size_t j = 1; j < 10; j++)
 		{
-			cout << coolingRate << ":" << k << ":";
-			sa = SimulatedAnnealing(&data, ini, temp, coolingRate);
-			start = std::chrono::high_resolution_clock::now();
-			best = sa.solve();
-			finish = std::chrono::high_resolution_clock::now();
-			elapsed = finish - start;
-			count += elapsed.count();
-			cout << elapsed.count() << endl;
+			double coolingRate = 0.1 * j;
+			double count = 0;
+			//10x per ini state
+			for (size_t k = 0; k < 10; k++)
+			{
+				cout << i << ":" << coolingRate << ":" << k << ":";
+				sa = SimulatedAnnealing(&data, ini, temp, coolingRate);
+				start = std::chrono::high_resolution_clock::now();
+				best = sa.solve();
+				finish = std::chrono::high_resolution_clock::now();
+				elapsed = finish - start;
+				count += elapsed.count();
+				cout << elapsed.count() << ":" << best.getNoFaults() << ":" << best.getPenalty() << endl;
+			}
+			cout << "\tMean:\t" << count / 10 << endl;
 		}
-		cout << "\tMean:\t" << count / 10 << endl;
+	}
+	std::cout.rdbuf(coutbuf);
+	cout << "Done!" << endl;
+}
+
+void executeGenDiff(Data data) {
+
+	Node best;
+	Genetics gn;
+	set<Node> population;
+	std::vector<Node> initials;
+
+	double temp = 100;
+
+	auto start = std::chrono::high_resolution_clock::now();
+	auto finish = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = finish - start;
+
+	std::ofstream out("out_gens.txt");
+	std::streambuf* coutbuf = std::cout.rdbuf();
+	std::cout.rdbuf(out.rdbuf());
+
+	//10 diff initial states
+	cout << "Initial States:" << endl;
+	for (size_t j = 0; j < 10; j++)
+	{
+		Node ini = data.generateInitialState();
+		data.evaluateSolution(&ini);
+		initials.push_back(ini);
+		cout << "ID: " << j + 1 << endl;
+		data.printNodeInfo(&ini);
+	}
+
+	for (size_t i = 0; i < initials.size(); i++)
+	{
+		Node ini = initials.at(i);
+		for (size_t j = 1; j < 10; j++)
+		{
+			double mutProb = 10 * j;
+			double count = 0;
+			//10x per ini state
+			for (size_t k = 0; k < 10; k++)
+			{
+				cout << i << ":" << mutProb << ":" << k << ":";
+				gn = Genetics(&data, ini, mutProb);
+				population.clear();
+				population.insert(ini);
+				start = std::chrono::high_resolution_clock::now();
+				best = gn.solve(population);
+				finish = std::chrono::high_resolution_clock::now();
+				elapsed = finish - start;
+				count += elapsed.count();
+				cout << elapsed.count() << ":" << best.getNoFaults() << ":" << best.getPenalty() << endl;
+			}
+			cout << "\tMean:\t" << count / 10 << endl;
+		}
 	}
 	std::cout.rdbuf(coutbuf);
 	cout << "Done!" << endl;
@@ -153,7 +222,8 @@ void mainMenuDisplay() {
 	cout << "\t3.\tExecute Genetics Algorithm once." << endl;
 	cout << "\t4.\tExecute Multiple." << endl;
 	cout << "\t5.\tExecute Simulated Annealing at different cooling rates." << endl;
-	cout << "\t6.\tExit." << endl;
+	cout << "\t6.\tExecute Genetics at different mutation rates." << endl;
+	cout << "\t7.\tExit." << endl;
 }
 
 void mainMenu(Data data) {
@@ -171,6 +241,9 @@ void mainMenu(Data data) {
 	double temp = 0;
 	double coolRate = 0;
 	int mutProbability = 0;
+	int pop = 0;
+
+	char option;
 
 	bool ending = false;
 	while (!ending)
@@ -211,6 +284,23 @@ void mainMenu(Data data) {
 			cout << "\tMutation Probability (0-100): " << endl;
 			cin >> mutProbability;
 
+			cout << "\tTime based?(y/n) " << endl;
+			cin >> option;
+
+			cout << "\tEnter population size: " << endl;
+			cin >> pop;
+
+			if (opt == 'y' || opt == 'Y') {
+				cout << "\tEnter max time(ms): " << endl;
+				cin >> temp;
+				gn = Genetics(&data, ini, pop, 100000000000, mutProbability, 15, temp);
+			}
+			else {
+				cout << "\tEnter max iterations: " << endl;
+				cin >> temp;
+				gn = Genetics(&data, ini, pop, temp, mutProbability, 15, 100000000000);
+			}
+
 			gn = Genetics(&data, ini, mutProbability);
 			population.insert(ini);
 			best = gn.solve(population);
@@ -224,6 +314,8 @@ void mainMenu(Data data) {
 			executeSADiff(data);
 			break;
 		case 6:
+			executeGenDiff(data);
+			break;
 		default:
 			ending = true;
 			break;
