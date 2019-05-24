@@ -44,6 +44,7 @@ Period::Period(Date date, Time time, int duration, int penalty, int id)
 	this->duration = duration;
 	this->penalty = penalty;
 	this->id = id;
+	this->endTime = Time(0, duration, 0) + this->time;
 }
 
 Date Period::getDate() const
@@ -69,6 +70,11 @@ int Period::getPenalty() const
 int Period::getId() const
 {
 	return this->id;
+}
+
+Time Period::getEndTime() const
+{
+	return this->endTime;
 }
 
 Room::Room(int capacity, int penalty, int id)
@@ -130,6 +136,18 @@ Time::Time(int hour, int minutes, int seconds)
 	this->hours = hour;
 	this->minutes = minutes;
 	this->seconds = seconds;
+	
+	std::string t = "";
+	if (hours < 10)
+		t += "0";
+	t += std::to_string(hours) + ":";
+	if (minutes < 10)
+		t += "0";
+	t += std::to_string(minutes) + ":";
+	if (seconds < 10)
+		t += "0";
+	t += std::to_string(seconds);
+	this->time_ = t;
 }
 
 int Time::getHours() const
@@ -286,12 +304,6 @@ FrontLoad InstitutionalWeightings::getFrontLoad() const
 
 
 
-
-
-
-
-
-
 bool operator<(const Date& lhs, const Date& rhs)
 {
 	if (lhs.getYear() < rhs.getYear())
@@ -361,6 +373,21 @@ bool operator==(const Time& lhs, const Time& rhs)
 {
 	return lhs.getHours() == rhs.getHours() && lhs.getMinutes() == rhs.getMinutes() && lhs.getSeconds() == rhs.getSeconds();
 }
+
+
+
+Time operator+(const Time& a, const Time& b) {
+	int h, m, s;
+	s = a.getSeconds() + b.getSeconds();
+	m = a.getMinutes() + b.getMinutes() + s / 60;
+	h = a.getHours() + b.getHours() + m / 60;
+	m = m % 60;
+	s = s % 60;
+
+	Time result = Time(h, m, s);
+	return result;
+}
+
 
 bool operator<(const Period& lhs, const Period& rhs)
 {

@@ -58,6 +58,7 @@ class Period {
 
 	Date date;
 	Time time;
+	Time endTime;
 	int duration;
 	int penalty;
 	int id;
@@ -69,6 +70,7 @@ public:
 	int getDuration() const;
 	int getPenalty() const;
 	int getId() const;
+	Time getEndTime() const;
 };
 
 class Room {
@@ -132,6 +134,9 @@ bool operator> (const Time& lhs, const Time& rhs);
 bool operator<=(const Time& lhs, const Time& rhs);
 bool operator>=(const Time& lhs, const Time& rhs);
 bool operator==(const Time& lhs, const Time& rhs);
+
+Time operator+(const Time& a, const Time& b);
+
 
 bool operator< (const Period& lhs, const Period& rhs);
 bool operator> (const Period& lhs, const Period& rhs);

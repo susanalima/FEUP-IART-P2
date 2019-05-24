@@ -72,6 +72,7 @@ void Data::buildIncompatibilitiesTable()
 
 void Data::buildPeriodExams(Node* solution)
 {
+	this->periodExams.clear();
 	std::pair<int, int> answer;
 	int periodIndex;
 	for (auto i = 0; i < solution->getAnswersSize(); i++) {
@@ -699,7 +700,7 @@ void Data::buildDisplay(Node* node)
 	outfile << "<title>Document</title>" << std::endl;
 	outfile << "</head>" << std::endl;
 	outfile << "<body>" << std::endl;
-	outfile << "<table class = \"table table-bordered borderless\">" << std::endl;
+	outfile << "<table class = \"table table-bordered borderless main\">" << std::endl;
 	for (auto it = this->periodDays.begin(); it != this->periodDays.end(); it++) {
 		outfile << "<td class=\"borderless\">" << std::endl;
 		outfile << "<table>" << std::endl;
@@ -710,7 +711,8 @@ void Data::buildDisplay(Node* node)
 
 		for (auto pI = 0; pI < it->second.size(); pI++) {
 			outfile << "<tr>" << std::endl;
-			outfile << "<td>" << this->periods.at(it->second.at(pI)).getTime().getTime() << " (" << this->periods.at(it->second.at(pI)).getId() << ")</td>" << std::endl;
+			outfile << "<td>" << this->periods.at(it->second.at(pI)).getTime().getTime() << " - " << this->periods.at(it->second.at(pI)).getEndTime().getTime();
+			outfile << " (" << this->periods.at(it->second.at(pI)).getId() << ")</td>" << std::endl;
 			outfile << "<td>" << std::endl;
 			auto pIter = this->periodExams.find(it->second.at(pI));
 			if (pIter == this->periodExams.end()) {
@@ -740,7 +742,7 @@ void Data::buildDisplay(Node* node)
 				outfile << "</ul>" << std::endl;
 				outfile << "</div>" << std::endl;
 				outfile << "<div class = \"modal-footer\">" << std::endl;
-				outfile << "<button type = \"button\" class = \"btn btn-secondary\" data - dismiss = \"modal\">Close</button>" << std::endl;
+				outfile << "<button type = \"button\" class = \"btn btn-secondary\" data-dismiss = \"modal\">Close</button>" << std::endl;
 				outfile << "</div>" << std::endl;
 				outfile << "</div>" << std::endl;
 				outfile << "</div>" << std::endl;
